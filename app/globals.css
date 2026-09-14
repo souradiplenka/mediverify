@@ -1,0 +1,119 @@
+/* Google Fonts — Playfair Display + Inter (BloomSense style) */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════
+   BASE TYPOGRAPHY
+═══════════════════════════════════════ */
+:root {
+  --green-deep:   #064e3b;
+  --green-mid:    #065f46;
+  --green-light:  #d1fae5;
+  --green-accent: #10b981;
+  --cream:        #faf7f2;
+  --text-dark:    #1a2e1e;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #ffffff;
+  color: var(--text-dark);
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', serif;
+}
+
+/* ═══════════════════════════════════════
+   BLOOMSENSE COMPONENT STYLES
+═══════════════════════════════════════ */
+@layer components {
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-6 py-2.5 rounded-full transition-all duration-200 flex items-center gap-2 cursor-pointer shadow-sm hover:shadow-md;
+  }
+  .btn-secondary {
+    @apply bg-white hover:bg-emerald-50 text-emerald-800 font-semibold px-6 py-2.5 rounded-full border border-emerald-200 transition-all duration-200 flex items-center gap-2 cursor-pointer;
+  }
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2.5 rounded-full transition-all duration-200 flex items-center gap-2 cursor-pointer;
+  }
+  .btn-outline {
+    @apply border-2 border-white/60 hover:border-white text-white font-semibold px-6 py-2.5 rounded-full transition-all duration-200 flex items-center gap-2 cursor-pointer;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
+  }
+  .card-green {
+    @apply bg-emerald-50 rounded-2xl border border-emerald-100 p-6;
+  }
+
+  /* Inputs */
+  .input-field {
+    @apply w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-800 bg-white transition-all;
+  }
+
+  /* Section headings */
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-gray-900 mb-3;
+    font-family: 'Playfair Display', serif;
+  }
+  .section-subtitle {
+    @apply text-gray-500 text-base mb-8 max-w-2xl;
+  }
+  .stat-card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1;
+  }
+}
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up { animation: fade-in-up 0.7s ease forwards; }
+
+@keyframes shader-fade-in-down {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shader-fade-in-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.shader-fade-in-down { animation: shader-fade-in-down 0.8s ease-out forwards; }
+.shader-fade-in-up   { animation: shader-fade-in-up 0.8s ease-out forwards; opacity: 0; }
+.shader-delay-200 { animation-delay: 0.2s; }
+.shader-delay-400 { animation-delay: 0.4s; }
+.shader-delay-600 { animation-delay: 0.6s; }
+.shader-delay-800 { animation-delay: 0.8s; }
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-gradient { background-size: 200% 200%; animation: gradient-shift 3s ease infinite; }
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.3); }
+  50%       { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
+}
+.pulse-verified { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════
+   NOISE OVERLAY
+═══════════════════════════════════════ */
+.noise-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
+}

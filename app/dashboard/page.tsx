@@ -61,12 +61,13 @@ export default function DashboardPage() {
     ]);
 
     setStats({ total: total ?? 0, verified: verified ?? 0, flagged: flagged ?? 0, reports: reports ?? 0, verificationsToday: todayV ?? 0 });
-    setVerifications((recentV ?? []) as VerifRow[]);
-    setReports((recentR ?? []) as ReportRow[]);
+    setVerifications((recentV ?? []) as unknown as VerifRow[]);
+    setReports((recentR ?? []) as unknown as ReportRow[]);
 
     // Group by category
     const catMap: Record<string, number> = {};
-    (meds ?? []).forEach((m: { category: string }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (meds ?? []).forEach((m: any) => {
       if (m.category) catMap[m.category] = (catMap[m.category] ?? 0) + 1;
     });
     setCategories(Object.entries(catMap).map(([category, count]) => ({ category, count })).sort((a, b) => b.count - a.count));

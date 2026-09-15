@@ -287,18 +287,42 @@ function VerifyContent() {
     setFdaMatch(null);
     setFdaChecked(false);
 
-    // Step 1: Check our Supabase database
-    const { data } = await supabase
+    // Step 1: Primary search — full term across all fields
+    let found: Medicine[] = [];
+    const { data: primary } = await supabase
       .from('medicines')
       .select('*')
       .or(`name.ilike.%${term}%,brand.ilike.%${term}%,batch_number.ilike.%${term}%,active_ingredient.ilike.%${term}%,category.ilike.%${term}%,description.ilike.%${term}%`);
+    found = primary ?? [];
 
-    const found = data ?? [];
+    // Step 1b: Keyword fallback — split "peptard 20" → search "peptard" then "20"
+    // Catches partial matches when full phrase doesn't match
+    if (found.length === 0) {
+      const words = term.split(/\s+/).filter(w => w.length >= 2);
+      for (const word of words) {
+        const { data: wordData } = await supabase
+          .from('medicines')
+          .select('*')
+          .or(`name.ilike.%${word}%,brand.ilike.%${word}%,active_ingredient.ilike.%${word}%,description.ilike.%${word}%`);
+        if (wordData && wordData.length > 0) { found = wordData; break; }
+      }
+    }
+
+    // Step 1c: Prefix fuzzy fallback — "pept" matches "pan" brands (first 4 chars)
+    if (found.length === 0 && term.length >= 4) {
+      const prefix = term.slice(0, 4);
+      const { data: prefixData } = await supabase
+        .from('medicines')
+        .select('*')
+        .or(`name.ilike.${prefix}%,brand.ilike.${prefix}%`);
+      if (prefixData && prefixData.length > 0) found = prefixData;
+    }
+
     setDbResults(found);
     setSearched(true);
     setLoading(false);
 
-    // Log verification in Supabase
+    // Log verification
     await supabase.from('verifications').insert({
       medicine_id: found[0]?.id ?? null,
       search_term: term,

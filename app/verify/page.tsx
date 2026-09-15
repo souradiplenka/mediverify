@@ -433,7 +433,7 @@ function VerifyContent() {
                   <ResultBanner medicine={dbResults[0]} />
                   <p className="text-sm text-gray-500 mb-4">Found {dbResults.length} match{dbResults.length > 1 ? 'es' : ''}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {dbResults.map(med => <MedicineCard key={med.id} medicine={med} />)}
+                    {dbResults.map(med => <MedicineCard key={med.id} medicine={med} expanded={true} />)}
                   </div>
                 </div>
               )}

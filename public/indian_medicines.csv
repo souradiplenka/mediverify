@@ -1,0 +1,72 @@
+name,brand,manufacturer,batch_number,manufacturing_date,expiry_date,active_ingredient,category,dosage,license_number,status,description,country
+Paracetamol,Dolo 650,Micro Labs Ltd,MCR-DOL650-2024-001,2024-01-01,2026-01-01,Paracetamol 650mg,Analgesic,650mg,LIC-MCR-001,verified,Widely used fever reducer and pain reliever in India,India
+Paracetamol,Crocin 500,GlaxoSmithKline,GSK-CRO-2024-001,2024-01-01,2026-01-01,Paracetamol 500mg,Analgesic,500mg,LIC-GSK-001,verified,Common pain relief and fever tablet,India
+Paracetamol,Calpol 500,GlaxoSmithKline,GSK-CAL-2024-001,2024-01-01,2026-01-01,Paracetamol 500mg,Analgesic,500mg,LIC-GSK-002,verified,Paracetamol tablet for fever and mild pain,India
+Ibuprofen + Paracetamol,Combiflam,Sanofi India,SNF-CMB-2024-001,2024-02-01,2026-02-01,Ibuprofen 400mg + Paracetamol 325mg,NSAID,400mg+325mg,LIC-SNF-001,verified,Combination tablet for pain and fever relief,India
+Aspirin,Ecosprin 75,USV Pvt Ltd,USV-ECS75-2024-001,2024-01-01,2026-01-01,Aspirin 75mg,Antiplatelet,75mg,LIC-USV-001,verified,Low dose aspirin for heart attack and stroke prevention,India
+Aspirin,Disprin,Reckitt Benckiser,RKT-DSP-2024-001,2024-01-01,2026-01-01,Aspirin 350mg,Analgesic,350mg,LIC-RKT-001,verified,Soluble aspirin for pain and fever,India
+Rabeprazole,Peptard 20,Torrent Pharmaceuticals,TOR-PEP20-2024-001,2024-03-01,2026-03-01,Rabeprazole Sodium 20mg,Antacid,20mg,LIC-TOR-001,verified,Proton pump inhibitor for acid reflux and GERD,India
+Pantoprazole,Pan 40,Alkem Laboratories,ALK-PAN40-2024-001,2024-01-01,2026-01-01,Pantoprazole 40mg,Antacid,40mg,LIC-ALK-001,verified,Proton pump inhibitor for GERD and stomach ulcers,India
+Pantoprazole,Pantocid 40,Sun Pharmaceutical,SUN-PTC40-2024-001,2024-01-01,2026-01-01,Pantoprazole 40mg,Antacid,40mg,LIC-SUN-001,verified,Used for acidity gastroesophageal reflux disease,India
+Omeprazole,Omez 20,Dr Reddys Laboratories,DRL-OMZ20-2024-001,2024-02-01,2026-02-01,Omeprazole 20mg,Antacid,20mg,LIC-DRL-001,verified,Proton pump inhibitor for acid reflux and peptic ulcers,India
+Rabeprazole,Razo 20,Sun Pharmaceutical,SUN-RAZ20-2024-001,2024-02-01,2026-02-01,Rabeprazole Sodium 20mg,Antacid,20mg,LIC-SUN-002,verified,Gastro-resistant tablet for acid related disorders,India
+Amoxicillin,Mox 500,Ranbaxy Laboratories,RAN-MOX500-2024-001,2024-01-01,2026-01-01,Amoxicillin 500mg,Antibiotic,500mg,LIC-RAN-001,verified,Broad spectrum antibiotic for bacterial infections,India
+Amoxicillin + Clavulanate,Augmentin 625,GlaxoSmithKline,GSK-AUG625-2024-001,2024-01-01,2026-01-01,Amoxicillin 500mg + Clavulanate 125mg,Antibiotic,625mg,LIC-GSK-003,verified,Combination antibiotic for resistant bacterial infections,India
+Azithromycin,Azithral 500,Alembic Pharmaceuticals,ALM-AZT500-2024-001,2024-02-01,2026-02-01,Azithromycin 500mg,Antibiotic,500mg,LIC-ALM-001,verified,Antibiotic for respiratory tract and skin infections,India
+Azithromycin,Zithromax 500,Pfizer India,PFZ-ZTM500-2024-001,2024-01-01,2026-01-01,Azithromycin 500mg,Antibiotic,500mg,LIC-PFZ-001,verified,Macrolide antibiotic for various bacterial infections,India
+Ciprofloxacin,Ciprobid 500,Cadila Healthcare,CDL-CPB500-2024-001,2024-02-01,2026-02-01,Ciprofloxacin 500mg,Antibiotic,500mg,LIC-CDL-001,verified,Fluoroquinolone antibiotic for urinary and respiratory infections,India
+Doxycycline,Doxt-S,Sun Pharmaceutical,SUN-DXT-2024-001,2024-01-01,2026-01-01,Doxycycline 100mg,Antibiotic,100mg,LIC-SUN-003,verified,Broad spectrum antibiotic for various bacterial infections,India
+Metformin,Glycomet 500,USV Pvt Ltd,USV-GLY500-2024-001,2024-01-01,2026-01-01,Metformin Hydrochloride 500mg,Antidiabetic,500mg,LIC-USV-002,verified,First line medication for type 2 diabetes management,India
+Metformin SR,Glycomet SR 500,USV Pvt Ltd,USV-GLYSR500-2024-001,2024-01-01,2026-01-01,Metformin Hydrochloride 500mg SR,Antidiabetic,500mg,LIC-USV-003,verified,Sustained release metformin for type 2 diabetes,India
+Metformin,Glucophage 500,Abbott India,ABT-GCP500-2024-001,2024-02-01,2026-02-01,Metformin Hydrochloride 500mg,Antidiabetic,500mg,LIC-ABT-001,verified,Blood glucose lowering medication for type 2 diabetes,India
+Glimepiride,Amaryl 2,Sanofi India,SNF-AMR2-2024-001,2024-01-01,2026-01-01,Glimepiride 2mg,Antidiabetic,2mg,LIC-SNF-002,verified,Sulfonylurea for type 2 diabetes blood sugar control,India
+Sitagliptin,Januvia 100,MSD India,MSD-JNV100-2024-001,2024-01-01,2026-01-01,Sitagliptin 100mg,Antidiabetic,100mg,LIC-MSD-001,verified,DPP-4 inhibitor for type 2 diabetes management,India
+Atorvastatin,Atorva 10,Zydus Cadila,ZYD-ATV10-2024-001,2024-01-01,2026-01-01,Atorvastatin 10mg,Statin,10mg,LIC-ZYD-001,verified,Statin for lowering LDL cholesterol and heart disease prevention,India
+Atorvastatin,Lipitor 10,Pfizer India,PFZ-LPT10-2024-001,2024-01-01,2026-01-01,Atorvastatin 10mg,Statin,10mg,LIC-PFZ-002,verified,Cholesterol lowering statin tablet,India
+Rosuvastatin,Rosuvas 10,Cipla Ltd,CIP-RSV10-2024-001,2024-01-01,2026-01-01,Rosuvastatin 10mg,Statin,10mg,LIC-CIP-001,verified,Statin for hypercholesterolemia and cardiovascular risk reduction,India
+Telmisartan,Telma 40,Glenmark Pharmaceuticals,GLN-TLM40-2024-001,2024-01-01,2026-01-01,Telmisartan 40mg,ACE Inhibitor,40mg,LIC-GLN-001,verified,ARB for hypertension and cardiovascular protection,India
+Telmisartan + Amlodipine,Telma AM,Glenmark Pharmaceuticals,GLN-TLMAM-2024-001,2024-02-01,2026-02-01,Telmisartan 40mg + Amlodipine 5mg,ACE Inhibitor,40mg+5mg,LIC-GLN-002,verified,Combination for hypertension management,India
+Amlodipine,Amlodac 5,Zydus Cadila,ZYD-AML5-2024-001,2024-01-01,2026-01-01,Amlodipine Besylate 5mg,ACE Inhibitor,5mg,LIC-ZYD-002,verified,Calcium channel blocker for hypertension and angina,India
+Lisinopril,Listril 5,Torrent Pharmaceuticals,TOR-LST5-2024-001,2024-01-01,2026-01-01,Lisinopril 5mg,ACE Inhibitor,5mg,LIC-TOR-002,verified,ACE inhibitor for high blood pressure and heart failure,India
+Cetirizine,Cetzine 10,Cipla Ltd,CIP-CTZ10-2024-001,2024-01-01,2026-01-01,Cetirizine Hydrochloride 10mg,Antihistamine,10mg,LIC-CIP-002,verified,Antihistamine for allergic rhinitis hives and urticaria,India
+Montelukast + Levocetirizine,Montair LC,Cipla Ltd,CIP-MLC-2024-001,2024-01-01,2026-01-01,Montelukast 10mg + Levocetirizine 5mg,Antihistamine,10mg+5mg,LIC-CIP-003,verified,Combination for allergic rhinitis and asthma,India
+Levocetirizine,Levocet 5,Sun Pharmaceutical,SUN-LVC5-2024-001,2024-01-01,2026-01-01,Levocetirizine Dihydrochloride 5mg,Antihistamine,5mg,LIC-SUN-004,verified,Second generation antihistamine for allergies,India
+Fexofenadine,Allegra 120,Sanofi India,SNF-ALG120-2024-001,2024-01-01,2026-01-01,Fexofenadine Hydrochloride 120mg,Antihistamine,120mg,LIC-SNF-003,verified,Non-sedating antihistamine for seasonal allergies,India
+Hydroxyzine,Atarax 10,UCB India,UCB-ATX10-2024-001,2024-01-01,2026-01-01,Hydroxyzine Hydrochloride 10mg,Antihistamine,10mg,LIC-UCB-001,verified,Antihistamine for anxiety and allergic conditions,India
+Calcium + Vitamin D3,Shelcal 500,Torrent Pharmaceuticals,TOR-SHC500-2024-001,2024-01-01,2026-01-01,Calcium Carbonate 500mg + Vitamin D3 250IU,Supplement,500mg+250IU,LIC-TOR-003,verified,Calcium supplement for bone health and osteoporosis,India
+Multivitamin,Becosules,Pfizer India,PFZ-BCS-2024-001,2024-01-01,2026-01-01,Vitamin B Complex + Vitamin C,Vitamin,Multivitamin,LIC-PFZ-003,verified,Multivitamin supplement for nutritional deficiencies,India
+Vitamin C,Limcee 500,Abbott India,ABT-LMC500-2024-001,2024-01-01,2026-01-01,Ascorbic Acid 500mg,Vitamin,500mg,LIC-ABT-002,verified,Chewable Vitamin C tablet for immune support,India
+Zinc + Multivitamin,Zincovit,Apex Laboratories,APX-ZCV-2024-001,2024-01-01,2026-01-01,Zinc 10mg + Vitamins,Supplement,10mg,LIC-APX-001,verified,Zinc and multivitamin supplement for immunity,India
+Iron + Folic Acid,Feronia XT,Alkem Laboratories,ALK-FRN-2024-001,2024-01-01,2026-01-01,Ferrous Ascorbate 100mg + Folic Acid 1.5mg,Supplement,100mg,LIC-ALK-002,verified,Iron supplement for anemia and pregnancy,India
+Hydroxychloroquine,HCQS 200,Ipca Laboratories,IPC-HCQ200-2024-001,2024-01-01,2026-01-01,Hydroxychloroquine Sulphate 200mg,Antimalarial,200mg,LIC-IPC-001,verified,Used for malaria lupus and rheumatoid arthritis,India
+Chloroquine,Lariago 250,Ipca Laboratories,IPC-LRG250-2024-001,2024-01-01,2026-01-01,Chloroquine Phosphate 250mg,Antimalarial,250mg,LIC-IPC-002,verified,Antimalarial drug for prevention and treatment of malaria,India
+Artemether + Lumefantrine,Coartem,Novartis India,NVT-CAT-2024-001,2024-01-01,2026-01-01,Artemether 20mg + Lumefantrine 120mg,Antimalarial,20mg+120mg,LIC-NVT-001,verified,Combination therapy for uncomplicated malaria,India
+Clopidogrel,Clopilet 75,Sun Pharmaceutical,SUN-CLP75-2024-001,2024-01-01,2026-01-01,Clopidogrel 75mg,Antiplatelet,75mg,LIC-SUN-005,verified,Antiplatelet for prevention of heart attack and stroke,India
+Atenolol,Tenormin 50,AstraZeneca India,AZN-TNM50-2024-001,2024-01-01,2026-01-01,Atenolol 50mg,ACE Inhibitor,50mg,LIC-AZN-001,verified,Beta blocker for high blood pressure and angina,India
+Metoprolol,Met XL 25,Cipla Ltd,CIP-MTL25-2024-001,2024-01-01,2026-01-01,Metoprolol Succinate 25mg,ACE Inhibitor,25mg,LIC-CIP-004,verified,Extended release beta blocker for hypertension and heart failure,India
+Furosemide,Lasix 40,Sanofi India,SNF-LSX40-2024-001,2024-01-01,2026-01-01,Furosemide 40mg,Supplement,40mg,LIC-SNF-004,verified,Loop diuretic for edema and hypertension,India
+Diclofenac,Voveran 50,Novartis India,NVT-VOV50-2024-001,2024-01-01,2026-01-01,Diclofenac Sodium 50mg,NSAID,50mg,LIC-NVT-002,verified,NSAID for pain inflammation and arthritis,India
+Aceclofenac,Zerodol 100,IPCA Laboratories,IPC-ZRD100-2024-001,2024-01-01,2026-01-01,Aceclofenac 100mg,NSAID,100mg,LIC-IPC-003,verified,NSAID for pain and inflammatory conditions,India
+Tramadol,Contramal 50,Grunenthal India,GRN-CTM50-2024-001,2024-01-01,2026-01-01,Tramadol Hydrochloride 50mg,Analgesic,50mg,LIC-GRN-001,verified,Opioid analgesic for moderate to severe pain,India
+Pregabalin,Pregabalin 75,Sun Pharmaceutical,SUN-PRG75-2024-001,2024-01-01,2026-01-01,Pregabalin 75mg,Analgesic,75mg,LIC-SUN-006,verified,Used for neuropathic pain fibromyalgia and anxiety,India
+Gabapentin,Gabantin 300,Sun Pharmaceutical,SUN-GBN300-2024-001,2024-01-01,2026-01-01,Gabapentin 300mg,Analgesic,300mg,LIC-SUN-007,verified,Used for epilepsy and neuropathic pain,India
+Pantoprazole + Domperidone,Pantodac DSR,Zydus Cadila,ZYD-PTDSR-2024-001,2024-01-01,2026-01-01,Pantoprazole 40mg + Domperidone 30mg,Antacid,40mg+30mg,LIC-ZYD-003,verified,Combination for GERD with motility disorders,India
+Domperidone,Domstal 10,Torrent Pharmaceuticals,TOR-DMS10-2024-001,2024-01-01,2026-01-01,Domperidone 10mg,Antacid,10mg,LIC-TOR-004,verified,Antiemetic and prokinetic for nausea and vomiting,India
+Ondansetron,Emeset 4,Cipla Ltd,CIP-EMS4-2024-001,2024-01-01,2026-01-01,Ondansetron 4mg,Antacid,4mg,LIC-CIP-005,verified,Antiemetic for nausea and vomiting from chemotherapy,India
+Metoclopramide,Perinorm 10,Neon Laboratories,NEN-PRN10-2024-001,2024-01-01,2026-01-01,Metoclopramide 10mg,Antacid,10mg,LIC-NEN-001,verified,Antiemetic for nausea vomiting and gastroparesis,India
+Levothyroxine,Thyronorm 50,Abbott India,ABT-THN50-2024-001,2024-01-01,2026-01-01,Levothyroxine Sodium 50mcg,Supplement,50mcg,LIC-ABT-003,verified,Thyroid hormone replacement for hypothyroidism,India
+Prednisolone,Wysolone 5,Wyeth India,WYT-WYS5-2024-001,2024-01-01,2026-01-01,Prednisolone 5mg,Supplement,5mg,LIC-WYT-001,verified,Corticosteroid for inflammation allergy and autoimmune conditions,India
+Methylprednisolone,Medrol 4,Pfizer India,PFZ-MDL4-2024-001,2024-01-01,2026-01-01,Methylprednisolone 4mg,Supplement,4mg,LIC-PFZ-004,verified,Corticosteroid for inflammatory and allergic conditions,India
+Alprazolam,Alprax 0.25,Torrent Pharmaceuticals,TOR-APX025-2024-001,2024-01-01,2026-01-01,Alprazolam 0.25mg,Supplement,0.25mg,LIC-TOR-005,verified,Benzodiazepine for anxiety and panic disorders,India
+Clonazepam,Rivotril 0.5,Roche India,RCH-RVT05-2024-001,2024-01-01,2026-01-01,Clonazepam 0.5mg,Supplement,0.5mg,LIC-RCH-001,verified,Used for epilepsy and panic disorder,India
+Sertraline,Daxid 50,Pfizer India,PFZ-DXD50-2024-001,2024-01-01,2026-01-01,Sertraline Hydrochloride 50mg,Supplement,50mg,LIC-PFZ-005,verified,SSRI antidepressant for depression and anxiety disorders,India
+Escitalopram,Nexito 10,Sun Pharmaceutical,SUN-NXT10-2024-001,2024-01-01,2026-01-01,Escitalopram Oxalate 10mg,Supplement,10mg,LIC-SUN-008,verified,SSRI for depression generalized anxiety and OCD,India
+Amoxicillin + Cloxacillin,Cloxamox 500,Mankind Pharma,MNK-CLX500-2024-001,2024-01-01,2026-01-01,Amoxicillin 250mg + Cloxacillin 250mg,Antibiotic,500mg,LIC-MNK-001,verified,Combination antibiotic for skin and soft tissue infections,India
+Cefixime,Taxim O 200,Alkem Laboratories,ALK-TXM200-2024-001,2024-01-01,2026-01-01,Cefixime 200mg,Antibiotic,200mg,LIC-ALK-003,verified,Third generation cephalosporin antibiotic,India
+Cefpodoxime,Cepodem 200,Lupin Pharmaceuticals,LUP-CPD200-2024-001,2024-01-01,2026-01-01,Cefpodoxime Proxetil 200mg,Antibiotic,200mg,LIC-LUP-001,verified,Oral cephalosporin antibiotic for respiratory infections,India
+Nitrofurantoin,Furadantin 100,Nirma Healthcare,NRM-FRD100-2024-001,2024-01-01,2026-01-01,Nitrofurantoin 100mg,Antibiotic,100mg,LIC-NRM-001,verified,Antibiotic specifically for urinary tract infections,India
+Nifedipine,Depin 10,Cadila Healthcare,CDL-DPN10-2024-001,2024-01-01,2026-01-01,Nifedipine 10mg,ACE Inhibitor,10mg,LIC-CDL-002,verified,Calcium channel blocker for hypertension and angina,India
+Spironolactone,Aldactone 25,Pfizer India,PFZ-ALD25-2024-001,2024-01-01,2026-01-01,Spironolactone 25mg,Supplement,25mg,LIC-PFZ-006,verified,Potassium-sparing diuretic for edema and hypertension,India
+Pantoprazole,Pantodac 40,Zydus Cadila,ZYD-PTD40-2024-001,2024-01-01,2026-01-01,Pantoprazole 40mg,Antacid,40mg,LIC-ZYD-004,verified,Proton pump inhibitor for gastric ulcers and GERD,India
+Esomeprazole,Nexpro 40,Torrent Pharmaceuticals,TOR-NXP40-2024-001,2024-01-01,2026-01-01,Esomeprazole Magnesium 40mg,Antacid,40mg,LIC-TOR-006,verified,PPI for GERD erosive esophagitis and H pylori,India
+Rabeprazole + Domperidone,Razo DSR,Sun Pharmaceutical,SUN-RZODSR-2024-001,2024-01-01,2026-01-01,Rabeprazole 20mg + Domperidone 30mg SR,Antacid,20mg+30mg,LIC-SUN-009,verified,Combination for acid reflux with motility issues,India

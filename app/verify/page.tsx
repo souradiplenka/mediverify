@@ -278,6 +278,26 @@ function VerifyContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Score how closely a medicine matches the search term (higher = better match)
+  const scoreMatch = (med: Medicine, term: string): number => {
+    const t = term.toLowerCase();
+    const brand = (med.brand ?? '').toLowerCase();
+    const name = (med.name ?? '').toLowerCase();
+    const active = (med.active_ingredient ?? '').toLowerCase();
+    let score = 0;
+    if (brand === t || name === t) score += 100;          // exact match
+    if (brand.startsWith(t) || name.startsWith(t)) score += 60; // starts with
+    if (brand.includes(t) || name.includes(t)) score += 40;     // contains in name
+    if (active.includes(t)) score += 20;                        // active ingredient
+    // Bonus for each query word found in brand/name
+    t.split(/\s+/).forEach(w => {
+      if (w.length > 3 && !(/^\d+$/.test(w))) { // skip pure numbers like "20"
+        if (brand.includes(w) || name.includes(w)) score += 15;
+      }
+    });
+    return score;
+  };
+
   const handleSearch = async (searchTerm?: string) => {
     const term = (searchTerm ?? query).trim();
     if (!term) return;
@@ -287,50 +307,65 @@ function VerifyContent() {
     setFdaMatch(null);
     setFdaChecked(false);
 
-    // Step 1: Primary search — full term across all fields
     let found: Medicine[] = [];
-    const { data: primary } = await supabase
+
+    // Step 1: Primary — search name & brand first (most accurate)
+    const { data: nameFirst } = await supabase
       .from('medicines')
       .select('*')
-      .or(`name.ilike.%${term}%,brand.ilike.%${term}%,batch_number.ilike.%${term}%,active_ingredient.ilike.%${term}%,category.ilike.%${term}%,description.ilike.%${term}%`);
-    found = primary ?? [];
+      .or(`name.ilike.%${term}%,brand.ilike.%${term}%`);
+    if (nameFirst && nameFirst.length > 0) found = nameFirst;
 
-    // Step 1b: Keyword fallback — split "peptard 20" → search "peptard" then "20"
-    // Catches partial matches when full phrase doesn't match
+    // Step 1b: Broaden to other fields if no name/brand match
     if (found.length === 0) {
-      const words = term.split(/\s+/).filter(w => w.length >= 2);
+      const { data: broad } = await supabase
+        .from('medicines')
+        .select('*')
+        .or(`batch_number.ilike.%${term}%,active_ingredient.ilike.%${term}%,description.ilike.%${term}%`);
+      found = broad ?? [];
+    }
+
+    // Step 1c: Keyword fallback — only use words longer than 3 chars, skip pure numbers
+    if (found.length === 0) {
+      const words = term.split(/\s+/).filter(w => w.length >= 4 && !(/^\d+$/.test(w)));
       for (const word of words) {
         const { data: wordData } = await supabase
           .from('medicines')
           .select('*')
-          .or(`name.ilike.%${word}%,brand.ilike.%${word}%,active_ingredient.ilike.%${word}%,description.ilike.%${word}%`);
+          .or(`name.ilike.%${word}%,brand.ilike.%${word}%,active_ingredient.ilike.%${word}%`);
         if (wordData && wordData.length > 0) { found = wordData; break; }
       }
     }
 
-    // Step 1c: Prefix fuzzy fallback — "pept" matches "pan" brands (first 4 chars)
-    if (found.length === 0 && term.length >= 4) {
-      const prefix = term.slice(0, 4);
-      const { data: prefixData } = await supabase
-        .from('medicines')
-        .select('*')
-        .or(`name.ilike.${prefix}%,brand.ilike.${prefix}%`);
-      if (prefixData && prefixData.length > 0) found = prefixData;
+    // Step 1d: Prefix fuzzy fallback — first 4 chars of first meaningful word
+    if (found.length === 0) {
+      const firstWord = term.split(/\s+/).find(w => w.length >= 4 && !(/^\d+$/.test(w)));
+      if (firstWord) {
+        const prefix = firstWord.slice(0, 4);
+        const { data: prefixData } = await supabase
+          .from('medicines')
+          .select('*')
+          .or(`name.ilike.${prefix}%,brand.ilike.${prefix}%`);
+        if (prefixData && prefixData.length > 0) found = prefixData;
+      }
     }
 
-    setDbResults(found);
+    // Sort by relevance score — best match first
+    const sorted = [...found].sort((a, b) => scoreMatch(b, term) - scoreMatch(a, term));
+
+    setDbResults(sorted);
     setSearched(true);
     setLoading(false);
 
     // Log verification
     await supabase.from('verifications').insert({
-      medicine_id: found[0]?.id ?? null,
+      medicine_id: sorted[0]?.id ?? null,
       search_term: term,
-      result: found.length > 0 ? found[0].status : 'not_found_local',
+      result: sorted.length > 0 ? sorted[0].status : 'not_found_local',
     });
 
     // Step 2: If NOT in our DB → check OpenFDA automatically
-    if (found.length === 0) {
+    if (sorted.length === 0) {
       setFdaLoading(true);
       const fdaResult = await checkOpenFDA(term);
       setFdaMatch(fdaResult);
@@ -431,10 +466,28 @@ function VerifyContent() {
                     </span>
                   </div>
                   <ResultBanner medicine={dbResults[0]} />
-                  <p className="text-sm text-gray-500 mb-4">Found {dbResults.length} match{dbResults.length > 1 ? 'es' : ''}</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {dbResults.map(med => <MedicineCard key={med.id} medicine={med} expanded={true} />)}
+
+                  {/* Best Match — first result */}
+                  <div className="mt-4 mb-2 flex items-center gap-2">
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 border border-emerald-200 px-3 py-1 rounded-full uppercase tracking-wide">
+                      ✅ Best Match — This is the medicine you searched for
+                    </span>
                   </div>
+                  <MedicineCard medicine={dbResults[0]} expanded={true} />
+
+                  {/* Other possible matches */}
+                  {dbResults.length > 1 && (
+                    <div className="mt-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs font-semibold text-gray-500 bg-gray-100 border border-gray-200 px-3 py-1 rounded-full uppercase tracking-wide">
+                          ⚠️ Other Possible Matches — May not be what you searched
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {dbResults.slice(1).map(med => <MedicineCard key={med.id} medicine={med} expanded={false} />)}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

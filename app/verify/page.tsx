@@ -86,6 +86,54 @@ async function checkOpenFDA(query: string): Promise<FDAMatch | null> {
   }
 }
 
+/* ══════════════════════════════════════════════
+   RXNORM API (NIH) — Free, no key needed
+   Validates generic drug names globally incl. Indian active ingredients
+   e.g. "Rabeprazole" → confirms it's a real registered drug
+══════════════════════════════════════════════ */
+interface RxNormMatch {
+  name: string;
+  rxcui: string;
+  synonym: string;
+  usedFor: string;
+}
+
+async function checkRxNorm(query: string): Promise<RxNormMatch | null> {
+  try {
+    // Search RxNorm for the drug name
+    const encoded = encodeURIComponent(query);
+    const res = await fetch(
+      `https://rxnav.nlm.nih.gov/REST/drugs.json?name=${encoded}`
+    );
+    const data = await res.json();
+    const groups = data.drugGroup?.conceptGroup;
+    if (!groups) return null;
+
+    // Find first valid concept
+    for (const group of groups) {
+      if (group.conceptProperties?.length > 0) {
+        const concept = group.conceptProperties[0];
+        // Get drug info
+        const infoRes = await fetch(
+          `https://rxnav.nlm.nih.gov/REST/rxcui/${concept.rxcui}/related.json?tty=IN`
+        );
+        const infoData = await infoRes.json();
+        const ingredient = infoData.relatedGroup?.conceptGroup?.[0]?.conceptProperties?.[0]?.name ?? '';
+
+        return {
+          name: concept.name,
+          rxcui: concept.rxcui,
+          synonym: ingredient || concept.synonym || '',
+          usedFor: group.ttyType ?? 'Drug',
+        };
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 /* ── QR Scanner ─────────────────────────────── */
 function QRScanner({ onScan }: { onScan: (text: string) => void }) {
   const divRef = useRef<HTMLDivElement>(null);
@@ -268,6 +316,10 @@ function VerifyContent() {
   const [fdaMatch, setFdaMatch] = useState<FDAMatch | null>(null);
   const [fdaChecked, setFdaChecked] = useState(false);
 
+  // RxNorm results (NIH free API — validates generic drug names for Indian medicines)
+  const [rxNormMatch, setRxNormMatch] = useState<RxNormMatch | null>(null);
+  const [rxNormChecked, setRxNormChecked] = useState(false);
+
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fdaLoading, setFdaLoading] = useState(false);
@@ -306,6 +358,8 @@ function VerifyContent() {
     setSearched(false);
     setFdaMatch(null);
     setFdaChecked(false);
+    setRxNormMatch(null);
+    setRxNormChecked(false);
 
     let found: Medicine[] = [];
 
@@ -364,12 +418,29 @@ function VerifyContent() {
       result: sorted.length > 0 ? sorted[0].status : 'not_found_local',
     });
 
-    // Step 2: If NOT in our DB → check OpenFDA automatically
     if (sorted.length === 0) {
       setFdaLoading(true);
+
+      // Step 2: Check OpenFDA (US global database)
       const fdaResult = await checkOpenFDA(term);
       setFdaMatch(fdaResult);
       setFdaChecked(true);
+
+      // Step 3: If OpenFDA also fails → try RxNorm (NIH free API)
+      // Searches each meaningful word — catches Indian brand active ingredients
+      // e.g. "Peptard 20" → tries "Peptard", "rabeprazole" etc.
+      if (!fdaResult) {
+        const words = term.split(/\s+/).filter(w => w.length >= 4 && !(/^\d+$/.test(w)));
+        const searchTerms = [term, ...words];
+        let rxResult: RxNormMatch | null = null;
+        for (const t of searchTerms) {
+          rxResult = await checkRxNorm(t);
+          if (rxResult) break;
+        }
+        setRxNormMatch(rxResult);
+        setRxNormChecked(true);
+      }
+
       setFdaLoading(false);
     }
   };
@@ -504,8 +575,45 @@ function VerifyContent() {
                       </div>
                       <FDAResultCard match={fdaMatch} query={query} />
                     </div>
+                  ) : rxNormChecked && rxNormMatch ? (
+                    /* Found in RxNorm (NIH) — active ingredient is real, just Indian brand */
+                    <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="inline-flex items-center gap-1.5 text-xs bg-orange-100 text-orange-700 border border-orange-200 px-3 py-1 rounded-full font-semibold">
+                          <Globe className="w-3.5 h-3.5" /> Active Ingredient Verified via NIH RxNorm
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center shrink-0">
+                          <CheckCircle className="w-6 h-6 text-orange-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-gray-900 text-lg mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
+                            ✅ This appears to be a real medicine
+                          </h3>
+                          <p className="text-sm text-gray-600 mb-4">
+                            The active ingredient <strong className="text-orange-700">&quot;{rxNormMatch.name}&quot;</strong> is a registered drug in the NIH global database. 
+                            This is likely an <strong>Indian brand name</strong> not yet in our local database.
+                          </p>
+                          <div className="bg-white rounded-xl border border-orange-100 p-4 mb-4 space-y-2 text-sm">
+                            <div className="flex gap-2"><span className="text-gray-500 w-32 shrink-0">Drug Name:</span><span className="font-semibold text-gray-800">{rxNormMatch.name}</span></div>
+                            {rxNormMatch.synonym && <div className="flex gap-2"><span className="text-gray-500 w-32 shrink-0">Ingredient:</span><span className="font-medium text-gray-700">{rxNormMatch.synonym}</span></div>}
+                            <div className="flex gap-2"><span className="text-gray-500 w-32 shrink-0">RxNorm ID:</span><span className="font-mono text-xs text-gray-500">{rxNormMatch.rxcui}</span></div>
+                            <div className="flex gap-2"><span className="text-gray-500 w-32 shrink-0">Source:</span><span className="text-gray-600">NIH National Library of Medicine</span></div>
+                          </div>
+                          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700 mb-4">
+                            <strong>ℹ️ Note:</strong> This is an Indian brand medicine. The active ingredient is globally registered, but the brand &quot;{query}&quot; is not in OpenFDA (US database). 
+                            To confirm it&apos;s in our system, ask your admin to add it via the Admin Panel.
+                          </div>
+                          <Link href={`/report?medicine=${encodeURIComponent(query)}`}
+                            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-full transition-colors">
+                            <AlertTriangle className="w-3.5 h-3.5" /> Still suspicious? Report it
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
-                    /* NOT found anywhere */
+                    /* NOT found in ANY database */
                     <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
                       <ShieldAlert className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
                       <h3 className="font-bold text-gray-800 mb-2 text-lg">⚠️ Not Found Anywhere</h3>
@@ -515,15 +623,13 @@ function VerifyContent() {
                       <ul className="text-sm text-gray-500 mb-4 space-y-1">
                         <li>❌ Our local medicine database</li>
                         <li>❌ OpenFDA global medicine database</li>
+                        <li>❌ NIH RxNorm drug registry</li>
                       </ul>
                       <p className="text-red-600 text-sm font-semibold mb-4">
                         This medicine may be unregistered, counterfeit, or simply not yet recorded anywhere.
                         Do NOT consume if in doubt.
                       </p>
-                      <Link
-                        href={`/report?medicine=${encodeURIComponent(query)}`}
-                        className="btn-danger inline-flex"
-                      >
+                      <Link href={`/report?medicine=${encodeURIComponent(query)}`} className="btn-danger inline-flex">
                         <AlertTriangle className="w-4 h-4" /> Report as Suspicious
                       </Link>
                     </div>

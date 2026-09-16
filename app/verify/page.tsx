@@ -87,7 +87,60 @@ async function checkOpenFDA(query: string): Promise<FDAMatch | null> {
 }
 
 /* ══════════════════════════════════════════════
-   RXNORM API (NIH) — Free, no key needed
+   INDIAN BRAND → GENERIC NAME MAPPING
+   Allows RxNorm to verify Indian brands by their active ingredient
+══════════════════════════════════════════════ */
+const INDIAN_BRANDS: Record<string, string> = {
+  // Antacids / PPI
+  'peptard': 'rabeprazole', 'pan': 'pantoprazole', 'pantocid': 'pantoprazole',
+  'pantodac': 'pantoprazole', 'omez': 'omeprazole', 'prilosec': 'omeprazole',
+  'razo': 'rabeprazole', 'nexpro': 'esomeprazole', 'nexium': 'esomeprazole',
+  'rablet': 'rabeprazole', 'aciloc': 'ranitidine', 'rantac': 'ranitidine',
+  // Pain / Fever
+  'dolo': 'paracetamol', 'crocin': 'paracetamol', 'calpol': 'paracetamol',
+  'tylenol': 'paracetamol', 'combiflam': 'ibuprofen', 'brufen': 'ibuprofen',
+  'voveran': 'diclofenac', 'zerodol': 'aceclofenac', 'disprin': 'aspirin',
+  'ecosprin': 'aspirin', 'contramal': 'tramadol', 'ultracet': 'tramadol',
+  // Antibiotics
+  'mox': 'amoxicillin', 'augmentin': 'amoxicillin', 'amoxil': 'amoxicillin',
+  'azithral': 'azithromycin', 'zithromax': 'azithromycin', 'azee': 'azithromycin',
+  'ciprobid': 'ciprofloxacin', 'ciplox': 'ciprofloxacin', 'taxim': 'cefixime',
+  'cepodem': 'cefpodoxime', 'doxt': 'doxycycline', 'clavam': 'amoxicillin',
+  // Diabetes
+  'glycomet': 'metformin', 'glucophage': 'metformin', 'gluconorm': 'metformin',
+  'amaryl': 'glimepiride', 'glimpid': 'glimepiride', 'januvia': 'sitagliptin',
+  'vildaglip': 'vildagliptin', 'galvus': 'vildagliptin',
+  // BP / Heart
+  'telma': 'telmisartan', 'telmikind': 'telmisartan', 'rosuvas': 'rosuvastatin',
+  'rozavel': 'rosuvastatin', 'atorva': 'atorvastatin', 'lipitor': 'atorvastatin',
+  'amlodac': 'amlodipine', 'amlong': 'amlodipine', 'clopilet': 'clopidogrel',
+  'plavix': 'clopidogrel', 'met xl': 'metoprolol', 'metolar': 'metoprolol',
+  'listril': 'lisinopril', 'tenormin': 'atenolol', 'lasix': 'furosemide',
+  // Allergy
+  'cetzine': 'cetirizine', 'alerid': 'cetirizine', 'montair': 'montelukast',
+  'singulair': 'montelukast', 'levocet': 'levocetirizine', 'allegra': 'fexofenadine',
+  // Vitamins / Supplements
+  'shelcal': 'calcium', 'becosules': 'vitamin b', 'limcee': 'ascorbic acid',
+  'zincovit': 'zinc', 'thyronorm': 'levothyroxine', 'eltroxin': 'levothyroxine',
+  // Antimalarial
+  'hcqs': 'hydroxychloroquine', 'lariago': 'chloroquine', 'coartem': 'artemether',
+  // Neuro
+  'gabantin': 'gabapentin', 'pregabalin': 'pregabalin', 'lyrica': 'pregabalin',
+  'nexito': 'escitalopram', 'daxid': 'sertraline', 'alprax': 'alprazolam',
+};
+
+function resolveGenericName(query: string): string | null {
+  const q = query.toLowerCase().trim();
+  // Direct match
+  if (INDIAN_BRANDS[q]) return INDIAN_BRANDS[q];
+  // Partial match — check if any brand name is contained in the query
+  for (const [brand, generic] of Object.entries(INDIAN_BRANDS)) {
+    if (q.includes(brand) || brand.includes(q.split(' ')[0])) return generic;
+  }
+  return null;
+}
+
+
    Validates generic drug names globally incl. Indian active ingredients
    e.g. "Rabeprazole" → confirms it's a real registered drug
 ══════════════════════════════════════════════ */
@@ -427,11 +480,14 @@ function VerifyContent() {
       setFdaChecked(true);
 
       // Step 3: If OpenFDA also fails → try RxNorm (NIH free API)
-      // Searches each meaningful word — catches Indian brand active ingredients
-      // e.g. "Peptard 20" → tries "Peptard", "rabeprazole" etc.
+      // First resolve Indian brand → generic name, then validate via RxNorm
       if (!fdaResult) {
+        const genericName = resolveGenericName(term);
         const words = term.split(/\s+/).filter(w => w.length >= 4 && !(/^\d+$/.test(w)));
-        const searchTerms = [term, ...words];
+        // Search: resolved generic first, then original words
+        const searchTerms = genericName
+          ? [genericName, term, ...words]
+          : [term, ...words];
         let rxResult: RxNormMatch | null = null;
         for (const t of searchTerms) {
           rxResult = await checkRxNorm(t);

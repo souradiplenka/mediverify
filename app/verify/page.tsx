@@ -190,6 +190,23 @@ async function checkRxNorm(query: string): Promise<RxNormMatch | null> {
   }
 }
 
+/* ── Helper: Clean scanned QR / Barcode text ── */
+function cleanScannedText(rawText: string): string {
+  let text = rawText.trim();
+  // If QR code is a URL (e.g. manufacturer product page), extract keywords & parameters
+  if (text.startsWith('http://') || text.startsWith('https://')) {
+    try {
+      const url = new URL(text);
+      const params = Array.from(url.searchParams.values()).join(' ');
+      const pathWords = url.pathname.replace(/[\/\-_.]/g, ' ');
+      text = `${params} ${pathWords}`.replace(/html|php|aspx|index/gi, '');
+    } catch { /* use raw */ }
+  }
+  // Remove GS1 DataMatrix identifiers like (01), (10), (17), (21)
+  text = text.replace(/\(\d{2}\)/g, ' ').replace(/\s+/g, ' ').trim();
+  return text || rawText;
+}
+
 /* ── QR & Barcode Scanner (Camera + Photo Upload) ── */
 function QRScanner({ onScan }: { onScan: (text: string) => void }) {
   const divRef = useRef<HTMLDivElement>(null);
@@ -206,15 +223,31 @@ function QRScanner({ onScan }: { onScan: (text: string) => void }) {
       if (!divRef.current) return;
       const scanner = new Html5Qrcode('qr-reader');
       scannerRef.current = scanner;
+
+      // Dynamic qrbox function — 80% of min viewport edge for easier alignment
+      const qrboxFunction = (viewfinderWidth: number, viewfinderHeight: number) => {
+        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+        const size = Math.floor(minEdge * 0.85);
+        return { width: size, height: size };
+      };
+
       await scanner.start(
         { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (text: string) => { scanner.stop().catch(() => {}); onScan(text); },
+        { 
+          fps: 15, 
+          qrbox: qrboxFunction,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+        },
+        (rawText: string) => {
+          const cleaned = cleanScannedText(rawText);
+          scanner.stop().catch(() => {});
+          onScan(cleaned);
+        },
         () => {}
       );
       setStarted(true);
     } catch {
-      setError('Camera access denied or not available.');
+      setError('Camera access denied or camera not found. Please check browser permissions.');
     }
   };
 
@@ -226,10 +259,11 @@ function QRScanner({ onScan }: { onScan: (text: string) => void }) {
     try {
       const { Html5Qrcode } = await import('html5-qrcode');
       const html5Qrcode = new Html5Qrcode('qr-reader-file-hidden');
-      const decodedText = await html5Qrcode.scanFile(file, true);
-      onScan(decodedText);
+      const rawText = await html5Qrcode.scanFile(file, true);
+      const cleaned = cleanScannedText(rawText);
+      onScan(cleaned);
     } catch {
-      setError('Could not detect a clear QR code or barcode in this photo. Please try a clearer or higher-contrast photo.');
+      setError('Could not detect a clear QR code or barcode in this photo. Please hold your phone closer or try a clearer photo.');
     } finally {
       setUploading(false);
     }
@@ -245,8 +279,15 @@ function QRScanner({ onScan }: { onScan: (text: string) => void }) {
   return (
     <div className="text-center max-w-md mx-auto">
       <div id="qr-reader-file-hidden" className="hidden" />
-      <div id="qr-reader" ref={divRef} className="mx-auto rounded-xl overflow-hidden border-2 border-emerald-200" />
+      <div id="qr-reader" ref={divRef} className="mx-auto rounded-2xl overflow-hidden border-2 border-emerald-300 shadow-inner" />
       
+      {started && (
+        <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center justify-center gap-2">
+          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping shrink-0" />
+          <span><strong>Scanning Live:</strong> Center the QR code inside the white square frame <strong className="text-base font-mono">[ ]</strong></span>
+        </div>
+      )}
+
       {!started && (
         <div className="mt-4 space-y-6">
           <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6">

@@ -580,12 +580,15 @@ function VerifyContent() {
     router.push(`/verify?q=${encodeURIComponent(text)}`);
   };
 
+  // Detect if query looks like a batch number (mostly digits or alphanumeric code)
+  const looksLikeBatchNumber = (q: string) => /^[A-Z0-9\-\/]{4,}$/i.test(q.trim()) && /\d{4,}/.test(q);
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold text-gray-800">Verify Medicine Authenticity</h1>
-        <p className="text-gray-500 mt-1">Search by name, brand, batch number, or scan QR/barcode on the packaging.</p>
+        <p className="text-gray-500 mt-1">Search by medicine name or brand name to verify authenticity.</p>
 
         {/* How it works badge */}
         <div className="mt-3 flex flex-wrap gap-2">
@@ -593,7 +596,7 @@ function VerifyContent() {
             <Info className="w-3 h-3" /> Checks our local database first, then OpenFDA global database automatically
           </span>
           <span className="inline-flex items-center gap-1.5 text-xs bg-green-50 text-green-700 border border-green-200 px-3 py-1 rounded-full font-medium">
-            <Globe className="w-3 h-3" /> Powered by OpenFDA — millions of medicines
+            <Globe className="w-3 h-3" /> Powered by OpenFDA + NIH RxNorm
           </span>
         </div>
       </div>
@@ -617,12 +620,12 @@ function VerifyContent() {
       {/* Search Tab */}
       {tab === 'search' && (
         <div>
-          <div className="flex gap-2 mb-8">
+          <div className="flex gap-2 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="e.g. Paracetamol, Calpol, antacid antigas liquid…"
+                placeholder="e.g. Dolo 650, Paracetamol, Augmentin, Pan 40…"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSearch()}
@@ -635,6 +638,28 @@ function VerifyContent() {
                 : <><Search className="w-4 h-4" />Search</>}
             </button>
           </div>
+
+          {/* ── Batch Number Info Box — shown when query looks like a batch number ── */}
+          {query && looksLikeBatchNumber(query) && !searched && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5 flex gap-3">
+              <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                <Info className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-amber-800 mb-1">⚠️ Batch numbers cannot be verified online</p>
+                <p className="text-xs text-amber-700 leading-relaxed mb-2">
+                  Indian medicine batch numbers (like <strong>{query}</strong>) are not indexed in any public database — not in OpenFDA, not in RxNorm, and not in CDSCO online. This does NOT mean the medicine is fake.
+                </p>
+                <p className="text-xs font-semibold text-amber-800 mb-1">✅ To verify this batch number:</p>
+                <ul className="text-xs text-amber-700 space-y-1">
+                  <li>• Search by <strong>medicine name</strong> instead (e.g. "Peptard 20", "Rabeprazole")</li>
+                  <li>• Contact the manufacturer directly with the batch number</li>
+                  <li>• Visit <a href="https://cdsco.gov.in" target="_blank" rel="noopener noreferrer" className="underline font-medium">cdsco.gov.in</a> — India&apos;s drug regulator</li>
+                  <li>• Call your state Drug Control department</li>
+                </ul>
+              </div>
+            </div>
+          )}
 
           {/* Loading states */}
           {loading && (

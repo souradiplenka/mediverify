@@ -31,13 +31,13 @@ export interface RiskPrediction {
   overallRiskLevel: 'low' | 'moderate' | 'high' | 'critical';
 }
 
-/* ── Sample Default Patient Profile ── */
+/* ── Default Clean Patient Profile for New Visitors ── */
 export const SAMPLE_PATIENT_PROFILE: UserProfile = {
-  name: 'Souradip Lenka',
-  age: 26,
-  gender: 'Male',
-  allergies: ['Penicillin'],
-  conditions: ['Acid Reflux (GERD)'],
+  name: 'Guest Patient',
+  age: 25,
+  gender: 'Not Specified',
+  allergies: [],
+  conditions: [],
 };
 
 /* ── Sample Active Medication Tracks ── */

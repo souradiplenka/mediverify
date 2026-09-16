@@ -26,18 +26,18 @@ export interface FullUserProfile {
 }
 
 const DEFAULT_PROFILE: FullUserProfile = {
-  name: 'Souradip Lenka',
-  age: 26,
-  gender: 'Male',
+  name: 'Guest Patient',
+  age: 25,
+  gender: 'Not Specified',
   bloodGroup: 'O+',
-  phone: '+91 98765 43210',
-  email: 'user@example.com',
-  allergies: ['Penicillin'],
-  conditions: ['Acid Reflux (GERD)'],
-  emergencyContact: 'Family Contact',
-  emergencyPhone: '+91 98765 00000',
-  primaryDoctor: 'Dr. A. Sharma (MD)',
-  doctorPhone: '+91 98765 11111',
+  phone: 'Not provided',
+  email: 'guest@mediverify.app',
+  allergies: [],
+  conditions: [],
+  emergencyContact: 'Not provided',
+  emergencyPhone: 'Not provided',
+  primaryDoctor: 'Not provided',
+  doctorPhone: 'Not provided',
 };
 
 export default function ProfilePage() {

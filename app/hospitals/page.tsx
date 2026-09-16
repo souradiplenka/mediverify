@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   MapPin, Phone, Navigation, ShieldAlert, AlertTriangle, Compass,
-  Search, Filter, ExternalLink, Clock, Star, Activity, Plus, Check, Loader2, HeartPulse, Building2, RefreshCw, Info, Lock
+  Search, Filter, ExternalLink, Clock, Star, Activity, Plus, Check, Loader2, HeartPulse, Building2, RefreshCw, Info, Lock, Edit3, CheckCircle2
 } from 'lucide-react';
 import { Hospital, HOSPITALS_DATABASE, calculateDistanceKm } from '@/lib/hospitalData';
 
@@ -19,8 +19,10 @@ export default function HospitalsPage() {
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [cityInput, setCityInput] = useState('');
-  const [locationSource, setLocationSource] = useState<'Exact GPS' | 'IP Address' | 'City Search' | 'Default'>('IP Address');
+  const [locationSource, setLocationSource] = useState<'Exact GPS' | 'IP Address' | 'City / Area Search' | 'Default'>('IP Address');
   const [permissionState, setPermissionState] = useState<'prompt' | 'granted' | 'denied' | 'unknown'>('unknown');
+  const [isEditingArea, setIsEditingArea] = useState(false);
+  const [areaInput, setAreaInput] = useState('');
 
   // Reverse geocode lat/lng to human address using Nominatim
   const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
@@ -132,16 +134,17 @@ export default function HospitalsPage() {
     setSelectedHospital(sorted[0]);
   };
 
-  // Perform City Search
-  const handleCitySearch = async (cityQuery: string) => {
-    if (!cityQuery.trim()) return;
+  // Perform City / Area Search
+  const handleCitySearch = async (queryStr: string) => {
+    if (!queryStr.trim()) return;
 
     setLocationLoading(true);
-    setLoadingText(`Locating ${cityQuery}…`);
+    setLoadingText(`Locating "${queryStr}"…`);
     setLocationError('');
+    setIsEditingArea(false);
 
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityQuery.trim())}&limit=1`);
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryStr.trim())}&limit=1`);
       const data = await res.json();
 
       if (data && data.length > 0) {
@@ -152,11 +155,11 @@ export default function HospitalsPage() {
 
         setUserLocation({ lat: targetLat, lng: targetLng });
         setUserAddress(fullAddr);
-        setLocationSource('City Search');
+        setLocationSource('City / Area Search');
 
         await fetchRealHospitalsNear(targetLat, targetLng, placeName);
       } else {
-        setLocationError(`Could not locate "${cityQuery}". Please check spelling.`);
+        setLocationError(`Could not locate "${queryStr}". Please check spelling or try adding your city name.`);
       }
     } catch {
       setLocationError('Network error searching location. Please try again.');
@@ -175,6 +178,7 @@ export default function HospitalsPage() {
     setLocationLoading(true);
     setLoadingText('Requesting exact GPS position… Please click "Allow" in your browser popup if prompted.');
     setLocationError('');
+    setIsEditingArea(false);
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -197,7 +201,7 @@ export default function HospitalsPage() {
         } else if (err.code === 3) {
           setLocationError('GPS request timed out. Showing location estimated from IP address.');
         } else {
-          setLocationError('Failed to get exact GPS location. You can type your city name below.');
+          setLocationError('Failed to get exact GPS location. You can type your neighborhood name below.');
         }
       },
       { timeout: 15000, enableHighAccuracy: true, maximumAge: 0 }
@@ -208,7 +212,6 @@ export default function HospitalsPage() {
   useEffect(() => {
     let resolved = false;
 
-    // Check browser permission status if supported
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
         setPermissionState(result.state);
@@ -309,7 +312,7 @@ export default function HospitalsPage() {
                 Nearby Hospitals & Emergency Map
               </h1>
               <p className="text-emerald-200/80 text-sm mt-2 max-w-xl leading-relaxed">
-                Click <span className="text-white font-bold">"Use My Exact GPS Location"</span> or type your city name to locate real 24/7 hospitals and ICUs nearest to you.
+                Type your area, pincode, or city name below, or click <span className="text-white font-bold">"Use My Exact GPS Location"</span> for real 24/7 emergency medical centers.
               </p>
             </div>
 
@@ -327,14 +330,14 @@ export default function HospitalsPage() {
             </button>
           </div>
 
-          {/* Prominent City Search Bar in Hero */}
+          {/* Prominent City / Suburb / Pincode Search Bar in Hero */}
           <div className="mt-8 bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/15 max-w-3xl">
             <form onSubmit={(e) => { e.preventDefault(); handleCitySearch(cityInput); }} className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400" />
                 <input
                   type="text"
-                  placeholder="Enter your City or Area (e.g. Cuttack, Kolkata, Delhi, Puri, Rourkela, Mumbai)..."
+                  placeholder="Enter your Area, Suburb, or Pincode (e.g. Patia, Saheed Nagar, 751024, Cuttack, Kolkata)..."
                   value={cityInput}
                   onChange={e => setCityInput(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 bg-white text-gray-900 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-medium placeholder:text-gray-400"
@@ -352,8 +355,8 @@ export default function HospitalsPage() {
 
             {/* Quick City Buttons */}
             <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-white/10 text-xs text-emerald-200">
-              <span className="font-semibold text-emerald-300">Quick Jump City:</span>
-              {['Cuttack', 'Bhubaneswar', 'Kolkata', 'Delhi', 'Mumbai', 'Bangalore'].map(cityName => (
+              <span className="font-semibold text-emerald-300">Quick Jump Area:</span>
+              {['Patia', 'Saheed Nagar', 'Cuttack', 'Bhubaneswar', 'Kolkata', 'Delhi'].map(cityName => (
                 <button
                   key={cityName}
                   onClick={() => { setCityInput(cityName); handleCitySearch(cityName); }}
@@ -371,14 +374,14 @@ export default function HospitalsPage() {
       {/* ── MAIN CONTENT ── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20 space-y-6">
         
-        {/* LIVE LOCATION IDENTIFIED BADGE */}
+        {/* LIVE LOCATION BADGE WITH EDITABLE NEIGHBORHOOD OPTION */}
         {userAddress && (
           <div className="bg-emerald-900 text-white rounded-3xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-emerald-700/80">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               <div className="w-10 h-10 bg-emerald-500/30 rounded-2xl flex items-center justify-center shrink-0 border border-emerald-400/40">
                 <MapPin className="w-5 h-5 text-emerald-300 animate-bounce" />
               </div>
-              <div>
+              <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] uppercase font-bold text-emerald-300 tracking-wider">Active Search Center</span>
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
@@ -387,9 +390,36 @@ export default function HospitalsPage() {
                     Mode: {locationSource}
                   </span>
                 </div>
-                <p className="font-extrabold text-white text-sm sm:text-base mt-0.5">
-                  {userAddress}
-                </p>
+
+                {isEditingArea ? (
+                  <form onSubmit={(e) => { e.preventDefault(); handleCitySearch(areaInput); }} className="flex items-center gap-2 mt-1">
+                    <input
+                      type="text"
+                      placeholder="Type your area (e.g. Patia, Saheed Nagar, 751024)..."
+                      value={areaInput}
+                      onChange={e => setAreaInput(e.target.value)}
+                      className="px-3 py-1 bg-white text-gray-900 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                      autoFocus
+                    />
+                    <button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Save
+                    </button>
+                    <button type="button" onClick={() => setIsEditingArea(false)} className="text-xs text-emerald-300 hover:underline">
+                      Cancel
+                    </button>
+                  </form>
+                ) : (
+                  <p className="font-extrabold text-white text-sm sm:text-base mt-0.5 flex items-center gap-2">
+                    {userAddress}
+                    <button
+                      onClick={() => { setAreaInput(userAddress); setIsEditingArea(true); }}
+                      className="text-[11px] bg-emerald-800 hover:bg-emerald-700 text-emerald-200 px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1 border border-emerald-600 transition-all"
+                      title="Click to refine your exact neighborhood"
+                    >
+                      <Edit3 className="w-3 h-3 text-emerald-300" /> Refine Neighborhood
+                    </button>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -400,6 +430,20 @@ export default function HospitalsPage() {
               >
                 <Compass className="w-3.5 h-3.5" /> Trigger Exact GPS
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* LAPTOP / DESKTOP EXPLANATORY TIP */}
+        {locationSource === 'IP Address' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs text-blue-900 flex items-start gap-3 shadow-sm">
+            <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-blue-800">💻 Laptop / PC Location Notice:</span> Your laptop is using IP network location. If the city shown above is a nearby telecom hub instead of your exact street:
+              <ul className="list-disc pl-4 mt-1 space-y-0.5 text-blue-800">
+                <li>Click <strong>"Refine Neighborhood"</strong> above or type your <strong>6-digit Pincode</strong> (e.g., 751024) or area name (e.g., Patia).</li>
+                <li>Or ensure your laptop's <strong>Wi-Fi is turned ON</strong> and click <strong>"Trigger Exact GPS"</strong>!</li>
+              </ul>
             </div>
           </div>
         )}

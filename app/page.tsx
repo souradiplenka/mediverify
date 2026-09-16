@@ -103,7 +103,7 @@ export default function HomePage() {
             className="w-full max-w-xl flex gap-2 mb-8">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input type="text" placeholder="Enter medicine name or batch number…"
+              <input type="text" placeholder="e.g. Dolo 650, Peptard 20, Augmentin, Pan 40…"
                 value={query} onChange={e => setQuery(e.target.value)}
                 className="w-full pl-11 pr-4 py-3.5 rounded-full bg-white text-gray-800 placeholder:text-gray-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-lg" />
             </div>

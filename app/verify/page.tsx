@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   Search, QrCode, CheckCircle, AlertTriangle, XCircle,
   HelpCircle, Camera, ArrowRight, Loader2, Globe, ShieldCheck,
-  ShieldAlert, ExternalLink, Info
+  ShieldAlert, ExternalLink, Info, Upload, ImageIcon
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import MedicineCard from '@/components/MedicineCard';
@@ -188,15 +188,18 @@ async function checkRxNorm(query: string): Promise<RxNormMatch | null> {
   }
 }
 
-/* ── QR Scanner ─────────────────────────────── */
+/* ── QR & Barcode Scanner (Camera + Photo Upload) ── */
 function QRScanner({ onScan }: { onScan: (text: string) => void }) {
   const divRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const scannerRef = useRef<unknown>(null);
   const [error, setError] = useState('');
   const [started, setStarted] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const startScanner = async () => {
     try {
+      setError('');
       const { Html5Qrcode } = await import('html5-qrcode');
       if (!divRef.current) return;
       const scanner = new Html5Qrcode('qr-reader');
@@ -213,6 +216,23 @@ function QRScanner({ onScan }: { onScan: (text: string) => void }) {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError('');
+    setUploading(true);
+    try {
+      const { Html5Qrcode } = await import('html5-qrcode');
+      const html5Qrcode = new Html5Qrcode('qr-reader-file-hidden');
+      const decodedText = await html5Qrcode.scanFile(file, true);
+      onScan(decodedText);
+    } catch {
+      setError('Could not detect a clear QR code or barcode in this photo. Please try a clearer or higher-contrast photo.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   useEffect(() => {
     return () => {
       const s = scannerRef.current as { stop?: () => Promise<void> } | null;
@@ -221,18 +241,58 @@ function QRScanner({ onScan }: { onScan: (text: string) => void }) {
   }, []);
 
   return (
-    <div className="text-center">
-      <div id="qr-reader" ref={divRef} className="mx-auto max-w-sm rounded-xl overflow-hidden border-2 border-blue-200" />
+    <div className="text-center max-w-md mx-auto">
+      <div id="qr-reader-file-hidden" className="hidden" />
+      <div id="qr-reader" ref={divRef} className="mx-auto rounded-xl overflow-hidden border-2 border-emerald-200" />
+      
       {!started && (
-        <div className="mt-6">
-          <Camera className="w-16 h-16 text-blue-300 mx-auto mb-4" />
-          <p className="text-gray-600 mb-4">Click below to start your camera and scan a medicine QR code or barcode.</p>
-          <button onClick={startScanner} className="btn-primary mx-auto">
-            <Camera className="w-4 h-4" /> Start Camera
-          </button>
+        <div className="mt-4 space-y-6">
+          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6">
+            <Camera className="w-12 h-12 text-emerald-600 mx-auto mb-3 opacity-80" />
+            <h3 className="font-bold text-gray-800 text-base mb-1">Live Camera Scan</h3>
+            <p className="text-xs text-gray-500 mb-4">Point your camera at the barcode or QR code on the packaging.</p>
+            <button onClick={startScanner} className="btn-primary mx-auto">
+              <Camera className="w-4 h-4" /> Start Camera Scan
+            </button>
+          </div>
+
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-gray-200" />
+            <span className="flex-shrink mx-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">OR</span>
+            <div className="flex-grow border-t border-gray-200" />
+          </div>
+
+          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6">
+            <ImageIcon className="w-12 h-12 text-blue-600 mx-auto mb-3 opacity-80" />
+            <h3 className="font-bold text-gray-800 text-base mb-1">Upload Barcode / QR Photo</h3>
+            <p className="text-xs text-gray-500 mb-4">Upload a photo of the barcode or QR code from your gallery/files.</p>
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all text-sm flex items-center justify-center gap-2 mx-auto"
+            >
+              {uploading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Scanning Image…</>
+              ) : (
+                <><Upload className="w-4 h-4" /> Choose Photo from Device</>
+              )}
+            </button>
+          </div>
         </div>
       )}
-      {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
+
+      {error && (
+        <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl">
+          {error}
+        </div>
+      )}
     </div>
   );
 }

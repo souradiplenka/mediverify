@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: '/',           label: 'Home' },
   { href: '/verify',     label: 'Verify Medicine' },
   { href: '/health-risk',label: 'Health Profile & Risk' },
+  { href: '/hospitals',  label: 'Nearby Hospitals' },
   { href: '/medicines',  label: 'Medicine Database' },
   { href: '/dashboard',  label: 'Dashboard' },
 ];

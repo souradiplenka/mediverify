@@ -140,7 +140,8 @@ function resolveGenericName(query: string): string | null {
   return null;
 }
 
-
+/* ══════════════════════════════════════════════
+   RXNORM API (NIH) — Free, no key needed
    Validates generic drug names globally incl. Indian active ingredients
    e.g. "Rabeprazole" → confirms it's a real registered drug
 ══════════════════════════════════════════════ */

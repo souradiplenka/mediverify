@@ -236,7 +236,6 @@ function QRScanner({ onScan }: { onScan: (text: string) => void }) {
         { 
           fps: 15, 
           qrbox: qrboxFunction,
-          experimentalFeatures: { useBarCodeDetectorIfSupported: true }
         },
         (rawText: string) => {
           const cleaned = cleanScannedText(rawText);

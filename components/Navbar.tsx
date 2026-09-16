@@ -8,6 +8,7 @@ import { Shield, Menu, X, AlertTriangle } from 'lucide-react';
 const NAV_LINKS = [
   { href: '/',           label: 'Home' },
   { href: '/verify',     label: 'Verify Medicine' },
+  { href: '/health-risk',label: 'Health Risk' },
   { href: '/medicines',  label: 'Medicine Database' },
   { href: '/dashboard',  label: 'Dashboard' },
 ];

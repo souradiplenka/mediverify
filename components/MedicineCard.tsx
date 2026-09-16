@@ -1,6 +1,6 @@
-'use client';
+import { useState } from 'react';
 import Link from 'next/link';
-import { Calendar, Building2, Hash, Pill, ArrowRight, Stethoscope, FlaskConical, Info, AlertCircle, Activity, BookOpen } from 'lucide-react';
+import { Calendar, Building2, Hash, Pill, ArrowRight, Stethoscope, FlaskConical, Info, AlertCircle, Activity, BookOpen, Plus, Check } from 'lucide-react';
 import { Medicine } from '@/types';
 import StatusBadge from './StatusBadge';
 
@@ -167,11 +167,42 @@ function getDrugInfo(medicine: Medicine): { uses: string[]; howItWorks: string; 
 }
 
 export default function MedicineCard({ medicine, expanded = false }: MedicineCardProps) {
+  const [added, setAdded] = useState(false);
+
   const expiry = medicine.expiry_date
     ? new Date(medicine.expiry_date).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })
     : 'N/A';
   const isExpired = medicine.expiry_date ? new Date(medicine.expiry_date) < new Date() : false;
   const drugInfo = getDrugInfo(medicine);
+
+  const handleAddToCabinet = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const saved = localStorage.getItem('mediverify_cabinet');
+      const cabinet = saved ? JSON.parse(saved) : [];
+      const exists = cabinet.some((m: { id: string }) => m.id === medicine.id);
+      if (!exists) {
+        const updated = [
+          {
+            id: medicine.id,
+            brand: medicine.brand || medicine.name,
+            name: medicine.name,
+            active_ingredient: medicine.active_ingredient || medicine.name,
+            category: medicine.category,
+            dosage: medicine.dosage,
+            expiry_date: medicine.expiry_date,
+            status: medicine.status,
+            addedAt: new Date().toISOString(),
+          },
+          ...cabinet,
+        ];
+        localStorage.setItem('mediverify_cabinet', JSON.stringify(updated));
+      }
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
+    } catch { /* storage full */ }
+  };
 
   return (
     <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 ${
@@ -291,12 +322,27 @@ export default function MedicineCard({ medicine, expanded = false }: MedicineCar
         </div>
       )}
 
-      {/* ── View Details ── */}
-      <Link href={`/medicines/${medicine.id}`}
-        className="mt-auto flex items-center justify-between text-sm font-semibold text-emerald-700 hover:text-emerald-900 transition-colors group">
-        View Full Details
-        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-      </Link>
+      {/* ── Card Footer Actions ── */}
+      <div className="mt-auto pt-3 flex items-center justify-between border-t border-gray-100 gap-2">
+        <button
+          onClick={handleAddToCabinet}
+          className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${
+            added
+              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+              : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-100'
+          }`}
+        >
+          {added ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+          {added ? 'Added to Cabinet' : 'Add to Cabinet'}
+        </button>
+
+        <Link href={`/medicines/${medicine.id}`}
+          className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-emerald-800 transition-colors group">
+          Details
+          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+        </Link>
+      </div>
+
     </div>
   );
 }

@@ -1,289 +1,208 @@
 import { supabase } from '@/lib/supabase';
 
-export interface CabinetMedicine {
-  id: string;
+export interface UserProfile {
   name: string;
+  age?: number;
+  gender?: string;
+  allergies?: string[];
+  conditions?: string[];
+}
+
+export interface MedicationTrack {
+  id: string;
   brand: string;
+  name: string;
   active_ingredient: string;
   category: string;
   dosage?: string;
-  expiry_date?: string;
+  startDate: string;         // YYYY-MM-DD
+  durationDays: number;       // Target days e.g. 5, 7, 14, 30
+  completedDates: string[];   // Array of YYYY-MM-DD dates ticked off by user
+  isRecovered: boolean;       // Marked true when user recovers
+  recoveredAt?: string;       // Date user marked recovered
   status: 'verified' | 'suspicious' | 'recalled' | 'unknown';
-  addedAt: string;
 }
 
-export interface InteractionRule {
-  drugA: string;
-  drugB: string;
-  severity: 'critical' | 'moderate' | 'low';
-  title: string;
-  description: string;
-  recommendation: string;
+export interface RiskPrediction {
+  currentDayNum: number;
+  expectedBenefits: string;
+  activeSideEffects: string[];
+  durationWarnings: string[];
+  overallRiskLevel: 'low' | 'moderate' | 'high' | 'critical';
 }
 
-/* ── Drug Interaction Rules Matrix ── */
-export const INTERACTION_RULES: InteractionRule[] = [
-  {
-    drugA: 'aspirin',
-    drugB: 'ibuprofen',
-    severity: 'critical',
-    title: 'High Gastrointestinal Bleeding Risk',
-    description: 'Combining Aspirin with Ibuprofen significantly increases the risk of stomach ulcers and internal bleeding.',
-    recommendation: 'Avoid taking Aspirin and Ibuprofen together. Consult a physician for an alternative pain reliever.'
-  },
-  {
-    drugA: 'aspirin',
-    drugB: 'clopidogrel',
-    severity: 'critical',
-    title: 'Severe Bleeding Risk',
-    description: 'Dual antiplatelet therapy (Aspirin + Clopidogrel) doubles the risk of major hemorrhages.',
-    recommendation: 'Must be taken only under strict cardiologist supervision with regular blood monitoring.'
-  },
-  {
-    drugA: 'rabeprazole',
-    drugB: 'clopidogrel',
-    severity: 'moderate',
-    title: 'Reduced Clopidogrel Efficacy',
-    description: 'Proton pump inhibitors like Rabeprazole can reduce the conversion of Clopidogrel into its active form.',
-    recommendation: 'Consider spacing doses or discussing an alternative antacid with your physician.'
-  },
-  {
-    drugA: 'pantoprazole',
-    drugB: 'methotrexate',
-    severity: 'moderate',
-    title: 'Increased Methotrexate Toxicity',
-    description: 'Pantoprazole may inhibit renal excretion of Methotrexate, leading to elevated blood levels.',
-    recommendation: 'Monitor blood counts closely if co-administered.'
-  },
-  {
-    drugA: 'ciprofloxacin',
-    drugB: 'tizanidine',
-    severity: 'critical',
-    title: 'Severe Hypotension Risk',
-    description: 'Ciprofloxacin inhibits CYP1A2, dramatically increasing Tizanidine levels and causing severe sedation and low BP.',
-    recommendation: 'Combination is contraindicated. Use an alternative antibiotic.'
-  },
-  {
-    drugA: 'ciprofloxacin',
-    drugB: 'antacid',
-    severity: 'moderate',
-    title: 'Reduced Antibiotic Absorption',
-    description: 'Antacids containing Aluminum or Magnesium bind to Ciprofloxacin in the stomach, preventing absorption.',
-    recommendation: 'Take Ciprofloxacin at least 2 hours before or 6 hours after taking antacids.'
-  },
-  {
-    drugA: 'metformin',
-    drugB: 'contrast',
-    severity: 'critical',
-    title: 'Lactic Acidosis Risk',
-    description: 'Iodinated contrast dyes used in CT scans can impair kidney function and cause Metformin accumulation.',
-    recommendation: 'Temporarily stop Metformin 48 hours prior to contrast imaging procedure.'
-  },
-  {
-    drugA: 'atorvastatin',
-    drugB: 'azithromycin',
-    severity: 'moderate',
-    title: 'Increased Muscle Toxicity Risk',
-    description: 'Azithromycin can modestly elevate Atorvastatin plasma concentrations, raising rhabdomyolysis risk.',
-    recommendation: 'Report any unexplained muscle pain or weakness immediately.'
-  },
-  {
-    drugA: 'telmisartan',
-    drugB: 'ibuprofen',
-    severity: 'moderate',
-    title: 'Reduced Blood Pressure Control & Kidney Damage',
-    description: 'NSAIDs like Ibuprofen decrease the antihypertensive effect of Telmisartan and increase renal risk.',
-    recommendation: 'Avoid frequent NSAID use while taking blood pressure medications.'
-  },
-  {
-    drugA: 'paracetamol',
-    drugB: 'alcohol',
-    severity: 'critical',
-    title: 'Severe Liver Toxicity Risk',
-    description: 'Alcohol induces CYP2E1 enzyme, leading to toxic NAPQI metabolite accumulation from Paracetamol.',
-    recommendation: 'Do not consume alcohol while taking Paracetamol or pain relievers.'
-  },
-  {
-    drugA: 'cetirizine',
-    drugB: 'alprazolam',
-    severity: 'moderate',
-    title: 'Enhanced Central Nervous System Depression',
-    description: 'Combining sedating antihistamines with benzodiazepines causes excessive drowsiness and slowed motor response.',
-    recommendation: 'Do not drive or operate machinery when taking these medications together.'
-  },
-];
+/* ── Sample Default Patient Profile ── */
+export const SAMPLE_PATIENT_PROFILE: UserProfile = {
+  name: 'Souradip Lenka',
+  age: 26,
+  gender: 'Male',
+  allergies: ['Penicillin'],
+  conditions: ['Acid Reflux (GERD)'],
+};
 
-/* ── Sample Demo Cabinet ── */
-export const SAMPLE_CABINET: CabinetMedicine[] = [
+/* ── Sample Active Medication Tracks ── */
+export const SAMPLE_MEDICATION_TRACKS: MedicationTrack[] = [
   {
-    id: 'sample-1',
-    name: 'Rabeprazole Sodium',
+    id: 'track-1',
     brand: 'Peptard 20',
-    active_ingredient: 'Rabeprazole Sodium 20mg',
+    name: 'Rabeprazole Sodium',
+    active_ingredient: 'Rabeprazole 20mg',
     category: 'Antacid',
-    dosage: '20mg',
-    expiry_date: '2026-12-31',
+    dosage: '20mg Once Daily',
+    startDate: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0], // 3 days ago
+    durationDays: 7,
+    completedDates: [
+      new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
+      new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
+      new Date(Date.now() - 1 * 86400000).toISOString().split('T')[0],
+    ],
+    isRecovered: false,
     status: 'verified',
-    addedAt: new Date().toISOString(),
   },
   {
-    id: 'sample-2',
-    name: 'Ibuprofen',
+    id: 'track-2',
     brand: 'Combiflam',
-    active_ingredient: 'Ibuprofen 400mg',
+    name: 'Ibuprofen & Paracetamol',
+    active_ingredient: 'Ibuprofen 400mg + Paracetamol 325mg',
     category: 'NSAID',
-    dosage: '400mg',
-    expiry_date: '2024-01-15', // Expired!
+    dosage: '400mg Twice Daily',
+    startDate: new Date(Date.now() - 8 * 86400000).toISOString().split('T')[0], // 8 days ago!
+    durationDays: 5,
+    completedDates: [
+      new Date(Date.now() - 8 * 86400000).toISOString().split('T')[0],
+      new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0],
+      new Date(Date.now() - 6 * 86400000).toISOString().split('T')[0],
+      new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0],
+      new Date(Date.now() - 4 * 86400000).toISOString().split('T')[0],
+      new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
+      new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
+      new Date(Date.now() - 1 * 86400000).toISOString().split('T')[0],
+    ],
+    isRecovered: false,
     status: 'verified',
-    addedAt: new Date().toISOString(),
-  },
-  {
-    id: 'sample-3',
-    name: 'Aspirin',
-    brand: 'Ecosprin 75',
-    active_ingredient: 'Aspirin 75mg',
-    category: 'Antiplatelet',
-    dosage: '75mg',
-    expiry_date: '2027-05-20',
-    status: 'verified',
-    addedAt: new Date().toISOString(),
   }
 ];
 
-/* ── Risk Calculation Engine ── */
-export interface RiskAnalysisResult {
-  score: number; // 0 to 100
-  level: 'low' | 'moderate' | 'high' | 'critical';
-  color: string;
-  badgeText: string;
-  detectedInteractions: Array<{
-    rule: InteractionRule;
-    medicineA: CabinetMedicine;
-    medicineB: CabinetMedicine;
-  }>;
-  expiredMedicines: CabinetMedicine[];
-  recalledMedicines: CabinetMedicine[];
-  unverifiedMedicines: CabinetMedicine[];
-  recommendations: string[];
-}
-
-export function analyzeCabinetRisk(cabinet: CabinetMedicine[]): RiskAnalysisResult {
-  let score = 0;
-  const detectedInteractions: Array<{ rule: InteractionRule; medicineA: CabinetMedicine; medicineB: CabinetMedicine }> = [];
-  const expiredMedicines: CabinetMedicine[] = [];
-  const recalledMedicines: CabinetMedicine[] = [];
-  const unverifiedMedicines: CabinetMedicine[] = [];
-  const recommendations: string[] = [];
-
+/* ── Dynamic Risk & Side Effect Predictor Engine ── */
+export function predictMedicationRiskAndEffects(track: MedicationTrack, profile?: UserProfile): RiskPrediction {
+  const start = new Date(track.startDate);
   const now = new Date();
+  const diffTime = Math.max(0, now.getTime() - start.getTime());
+  const currentDayNum = Math.max(1, Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1);
 
-  // 1. Check expired / recalled / suspicious
-  cabinet.forEach(med => {
-    if (med.expiry_date && new Date(med.expiry_date) < now) {
-      expiredMedicines.push(med);
-      score += 25;
-      recommendations.push(`Safely dispose expired medicine "${med.brand || med.name}" (Expired ${new Date(med.expiry_date).toLocaleDateString()}).`);
+  const activeIngredient = (track.active_ingredient || track.brand || track.name).toLowerCase();
+  const category = (track.category || '').toLowerCase();
+
+  let expectedBenefits = 'Symptom management and therapeutic relief expected.';
+  const activeSideEffects: string[] = [];
+  const durationWarnings: string[] = [];
+  let overallRiskLevel: 'low' | 'moderate' | 'high' | 'critical' = 'low';
+
+  // 1. Evaluate Benefits & Side Effects Timeline
+  if (activeIngredient.includes('rabeprazole') || activeIngredient.includes('pantoprazole') || activeIngredient.includes('omeprazole') || category.includes('antacid')) {
+    expectedBenefits = currentDayNum <= 2 
+      ? 'Initial reduction in stomach acid production (30-60 min post dose).'
+      : 'Optimal acid suppression & gastric lining healing underway.';
+
+    if (currentDayNum <= 3) {
+      activeSideEffects.push('Mild headache or temporary nausea (common in first 3 days)');
+      activeSideEffects.push('Mild flatulence or dry mouth');
+    } else {
+      activeSideEffects.push('Stomach pain or loose stools (if taking without water)');
     }
-    if (med.status === 'recalled' || med.status === 'suspicious') {
-      recalledMedicines.push(med);
-      score += 35;
-      recommendations.push(`IMMEDIATE ACTION: Do not consume "${med.brand || med.name}" — flagged as ${med.status.toUpperCase()}.`);
+
+    if (currentDayNum > 30) {
+      durationWarnings.push('⚠️ Over-use Warning: Taking PPI antacids continuously for >30 days can impair Vitamin B12 and Magnesium absorption.');
+      overallRiskLevel = 'high';
     }
-    if (med.status === 'unknown') {
-      unverifiedMedicines.push(med);
-      score += 10;
+  } 
+  else if (activeIngredient.includes('ibuprofen') || activeIngredient.includes('diclofenac') || category.includes('nsaid')) {
+    expectedBenefits = 'Analgesic pain relief and reduction of tissue swelling.';
+
+    if (currentDayNum <= 2) {
+      activeSideEffects.push('Mild stomach discomfort or heartburn');
+    } else {
+      activeSideEffects.push('Increased gastric mucosa irritation risk');
+      activeSideEffects.push('Dizziness or mild fluid retention');
     }
-  });
 
-  // 2. Check drug-drug interactions
-  for (let i = 0; i < cabinet.length; i++) {
-    for (let j = i + 1; j < cabinet.length; j++) {
-      const medA = cabinet[i];
-      const medB = cabinet[j];
-
-      const keyA = `${medA.name} ${medA.brand} ${medA.active_ingredient} ${medA.category}`.toLowerCase();
-      const keyB = `${medB.name} ${medB.brand} ${medB.active_ingredient} ${medB.category}`.toLowerCase();
-
-      INTERACTION_RULES.forEach(rule => {
-        const matchesA = keyA.includes(rule.drugA) || keyA.includes(rule.drugB);
-        const matchesB = keyB.includes(rule.drugA) || keyB.includes(rule.drugB);
-        const crossMatch = (keyA.includes(rule.drugA) && keyB.includes(rule.drugB)) ||
-                           (keyA.includes(rule.drugB) && keyB.includes(rule.drugA));
-
-        if (crossMatch || (matchesA && matchesB && rule.drugA !== rule.drugB)) {
-          detectedInteractions.push({ rule, medicineA: medA, medicineB: medB });
-          if (rule.severity === 'critical') score += 30;
-          else if (rule.severity === 'moderate') score += 15;
-          else score += 5;
-
-          recommendations.push(`Interaction alert: ${rule.title} between ${medA.brand || medA.name} and ${medB.brand || medB.name}.`);
-        }
-      });
+    if (currentDayNum >= 7) {
+      durationWarnings.push('🚨 OVER-USE WARNING: Taking NSAID painkillers continuously for >7 days significantly increases stomach ulcer and kidney injury risks.');
+      overallRiskLevel = 'critical';
     }
   }
+  else if (activeIngredient.includes('amoxicillin') || activeIngredient.includes('azithromycin') || category.includes('antibiotic')) {
+    expectedBenefits = 'Bacterial inhibition; infection symptom resolution expected by Day 3.';
 
-  // Cap score at 100
-  const finalScore = Math.min(100, Math.max(0, score));
+    activeSideEffects.push('Mild diarrhoea or gut microbiome alteration');
+    activeSideEffects.push('Nausea or loss of appetite');
 
-  let level: 'low' | 'moderate' | 'high' | 'critical' = 'low';
-  let color = 'text-emerald-600 bg-emerald-50 border-emerald-200';
-  let badgeText = 'LOW RISK — Cabinet Appears Safe';
+    if (track.completedDates.length < 5 && track.completedDates.length < track.durationDays) {
+      durationWarnings.push('⚠️ Early Stop Warning: Stopping antibiotics before completing the 5-7 day course leads to antibiotic resistance.');
+      overallRiskLevel = 'high';
+    }
+  }
+  else if (activeIngredient.includes('paracetamol') || activeIngredient.includes('acetaminophen')) {
+    expectedBenefits = 'Fever reduction and mild pain control.';
 
-  if (finalScore >= 70) {
-    level = 'critical';
-    color = 'text-red-700 bg-red-50 border-red-300';
-    badgeText = 'CRITICAL HEALTH RISK — Immediate Review Needed';
-  } else if (finalScore >= 40) {
-    level = 'high';
-    color = 'text-amber-800 bg-amber-50 border-amber-300';
-    badgeText = 'HIGH RISK — Attention Required';
-  } else if (finalScore >= 15) {
-    level = 'moderate';
-    color = 'text-yellow-800 bg-yellow-50 border-yellow-200';
-    badgeText = 'MODERATE RISK — Minor Warnings Detected';
+    activeSideEffects.push('Generally well tolerated at recommended dosages');
+
+    if (currentDayNum >= 6) {
+      durationWarnings.push('⚠️ High Liver Strain: Continuous daily Paracetamol use for >5 days requires doctor review to prevent hepatic stress.');
+      overallRiskLevel = 'high';
+    }
+  }
+  else {
+    expectedBenefits = `Targeted therapeutic response for ${track.category || 'prescribed condition'}.`;
+    activeSideEffects.push('Consult prescription leaflet for complete side effect profile');
   }
 
-  if (recommendations.length === 0) {
-    recommendations.push('Keep medications stored in a cool, dry place away from direct sunlight.');
-    recommendations.push('Always check expiry dates before consuming any medicine.');
+  // 2. Check Allergy Conflict
+  if (profile?.allergies) {
+    profile.allergies.forEach(allergy => {
+      if (activeIngredient.includes(allergy.toLowerCase()) || track.brand.toLowerCase().includes(allergy.toLowerCase())) {
+        durationWarnings.push(`🚨 CRITICAL ALLERGY CONFLICT: You listed "${allergy}" in your allergy profile! Stop taking immediately.`);
+        overallRiskLevel = 'critical';
+      }
+    });
   }
 
   return {
-    score: finalScore,
-    level,
-    color,
-    badgeText,
-    detectedInteractions,
-    expiredMedicines,
-    recalledMedicines,
-    unverifiedMedicines,
-    recommendations,
+    currentDayNum,
+    expectedBenefits,
+    activeSideEffects,
+    durationWarnings,
+    overallRiskLevel,
   };
 }
 
-/* ── Supabase Cloud Cabinet Sync Helpers ── */
-export async function fetchUserCabinetFromCloud(userId: string): Promise<CabinetMedicine[] | null> {
+/* ── Supabase Cloud Storage Helpers for Patient Tracks ── */
+export async function fetchUserPatientData(userId: string): Promise<{ profile: UserProfile; tracks: MedicationTrack[] } | null> {
   try {
     const { data, error } = await supabase
-      .from('user_cabinets')
-      .select('cabinet_data')
+      .from('user_patient_records')
+      .select('profile, tracks')
       .eq('user_id', userId)
       .maybeSingle();
 
     if (error || !data) return null;
-    return data.cabinet_data as CabinetMedicine[];
+    return {
+      profile: data.profile as UserProfile,
+      tracks: data.tracks as MedicationTrack[],
+    };
   } catch {
     return null;
   }
 }
 
-export async function saveUserCabinetToCloud(userId: string, cabinet: CabinetMedicine[]): Promise<boolean> {
+export async function saveUserPatientData(userId: string, profile: UserProfile, tracks: MedicationTrack[]): Promise<boolean> {
   try {
     const { error } = await supabase
-      .from('user_cabinets')
+      .from('user_patient_records')
       .upsert({
         user_id: userId,
-        cabinet_data: cabinet,
+        profile,
+        tracks,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' });
 
@@ -292,4 +211,3 @@ export async function saveUserCabinetToCloud(userId: string, cabinet: CabinetMed
     return false;
   }
 }
-

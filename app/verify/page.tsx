@@ -269,12 +269,47 @@ function ResultBanner({ medicine }: { medicine: Medicine }) {
   );
 }
 
+/* ── Drug purpose lookup by generic/brand name ── */
+const PURPOSE_MAP: Record<string, { uses: string[]; howItWorks: string; sideEffects: string[]; takeWith: string }> = {
+  rabeprazole:       { uses: ['Acid reflux (GERD)', 'Stomach ulcers', 'Heartburn', 'H. pylori infection'], howItWorks: 'Blocks the proton pump in the stomach lining to reduce acid production.', sideEffects: ['Headache', 'Diarrhoea', 'Nausea', 'Stomach pain'], takeWith: 'Take 30 min before meals. Swallow whole — do not crush.' },
+  pantoprazole:      { uses: ['Acid reflux (GERD)', 'Gastric ulcers', 'Heartburn', 'Esophagitis'], howItWorks: 'Proton pump inhibitor — reduces stomach acid by blocking the acid-secreting enzyme.', sideEffects: ['Headache', 'Diarrhoea', 'Nausea', 'Dizziness'], takeWith: 'Take before breakfast with or without food.' },
+  omeprazole:        { uses: ['Acid reflux', 'Peptic ulcers', 'Heartburn', 'Stomach protection'], howItWorks: 'Irreversibly blocks the H+/K+ ATPase enzyme in gastric cells to reduce acid.', sideEffects: ['Headache', 'Nausea', 'Diarrhoea', 'Constipation'], takeWith: 'Take 30–60 minutes before a meal.' },
+  esomeprazole:      { uses: ['GERD', 'Erosive esophagitis', 'H. pylori eradication', 'Zollinger-Ellison syndrome'], howItWorks: 'S-isomer of omeprazole — potent proton pump inhibitor reducing gastric acid.', sideEffects: ['Headache', 'Nausea', 'Diarrhoea', 'Flatulence'], takeWith: 'Take 1 hour before meals.' },
+  paracetamol:       { uses: ['Fever', 'Headache', 'Mild to moderate pain', 'Cold & flu', 'Toothache', 'Body ache'], howItWorks: 'Blocks pain signals in brain and lowers body temperature via hypothalamus.', sideEffects: ['Generally well tolerated', 'Liver damage if overdosed'], takeWith: 'Can be taken with or without food. Max 4g/day for adults.' },
+  ibuprofen:         { uses: ['Pain relief', 'Fever', 'Inflammation', 'Arthritis', 'Menstrual cramps'], howItWorks: 'NSAID — blocks COX-1 and COX-2 enzymes that produce pain-causing prostaglandins.', sideEffects: ['Stomach upset', 'Heartburn', 'Nausea', 'Risk of stomach bleeding'], takeWith: 'Always take after food or milk to protect the stomach.' },
+  amoxicillin:       { uses: ['Throat infections', 'Ear infections', 'Pneumonia', 'UTI', 'Skin infections'], howItWorks: 'Beta-lactam antibiotic — kills bacteria by destroying their cell wall.', sideEffects: ['Nausea', 'Diarrhoea', 'Skin rash', 'Allergic reaction'], takeWith: 'Complete the full course even if feeling better.' },
+  azithromycin:      { uses: ['Respiratory infections', 'Pneumonia', 'Sinusitis', 'Skin infections', 'STIs'], howItWorks: 'Macrolide antibiotic — prevents bacteria from making essential proteins.', sideEffects: ['Nausea', 'Diarrhoea', 'Stomach pain', 'Headache'], takeWith: 'Take once daily on empty stomach or with food.' },
+  ciprofloxacin:     { uses: ['UTI', 'Respiratory infections', 'Typhoid fever', 'Traveller\'s diarrhoea'], howItWorks: 'Fluoroquinolone — damages bacterial DNA gyrase preventing bacteria from replicating.', sideEffects: ['Nausea', 'Diarrhoea', 'Headache', 'Dizziness'], takeWith: 'Take with plenty of water. Avoid antacids within 2 hours.' },
+  metformin:         { uses: ['Type 2 Diabetes', 'Prediabetes', 'PCOS', 'Insulin resistance'], howItWorks: 'Reduces glucose production in liver, improves insulin sensitivity, slows sugar absorption.', sideEffects: ['Nausea', 'Diarrhoea', 'Stomach upset', 'Metallic taste'], takeWith: 'Always take with or just after meals.' },
+  atorvastatin:      { uses: ['High cholesterol', 'High triglycerides', 'Heart attack prevention', 'Stroke prevention'], howItWorks: 'Statin — blocks HMG-CoA reductase enzyme in liver that produces cholesterol.', sideEffects: ['Muscle pain', 'Headache', 'Nausea', 'Joint pain'], takeWith: 'Take at night. Can take with or without food.' },
+  rosuvastatin:      { uses: ['High LDL cholesterol', 'Low HDL', 'High triglycerides', 'Heart disease prevention'], howItWorks: 'Most potent statin — strongly inhibits cholesterol synthesis in the liver.', sideEffects: ['Muscle pain', 'Headache', 'Constipation', 'Nausea'], takeWith: 'Can be taken at any time of day.' },
+  telmisartan:       { uses: ['Hypertension', 'Heart failure', 'Stroke prevention', 'Kidney protection in diabetes'], howItWorks: 'ARB — blocks angiotensin II from narrowing blood vessels, lowering blood pressure.', sideEffects: ['Dizziness', 'Low blood pressure', 'Headache', 'Back pain'], takeWith: 'Take at the same time daily with or without food.' },
+  amlodipine:        { uses: ['High blood pressure', 'Angina (chest pain)', 'Coronary artery disease'], howItWorks: 'Calcium channel blocker — relaxes blood vessels and reduces heart workload.', sideEffects: ['Ankle swelling', 'Flushing', 'Headache', 'Dizziness'], takeWith: 'Take once daily. Can be taken with or without food.' },
+  cetirizine:        { uses: ['Seasonal allergies', 'Hay fever', 'Hives', 'Skin itching', 'Runny nose', 'Watery eyes'], howItWorks: 'Antihistamine — blocks H1 receptors preventing histamine from causing allergic symptoms.', sideEffects: ['Drowsiness', 'Dry mouth', 'Headache', 'Fatigue'], takeWith: 'Take at night — may cause drowsiness.' },
+  montelukast:       { uses: ['Asthma prevention', 'Seasonal allergies', 'Allergic rhinitis', 'Exercise-induced asthma'], howItWorks: 'Blocks leukotriene receptors, reducing swelling and tightening in airways.', sideEffects: ['Headache', 'Stomach pain', 'Mood changes (rare)'], takeWith: 'Take in the evening for asthma.' },
+  aspirin:           { uses: ['Heart attack prevention', 'Stroke prevention', 'Pain relief', 'Fever', 'Anti-inflammatory'], howItWorks: 'Irreversibly blocks COX enzymes — reduces platelet aggregation and prostaglandins.', sideEffects: ['Stomach irritation', 'Bleeding risk', 'Heartburn', 'Nausea'], takeWith: 'Take with food or milk. Low dose for heart — do not crush.' },
+  clopidogrel:       { uses: ['Heart attack prevention', 'Stroke prevention', 'After stent placement', 'Peripheral artery disease'], howItWorks: 'Antiplatelet — blocks P2Y12 receptor on platelets preventing dangerous blood clots.', sideEffects: ['Bleeding', 'Bruising', 'Stomach pain', 'Headache'], takeWith: 'Take daily at the same time. Never stop without doctor advice.' },
+  levothyroxine:     { uses: ['Hypothyroidism (underactive thyroid)', 'Goitre', 'Thyroid cancer (post-surgery)'], howItWorks: 'Synthetic thyroid hormone replacing T4 the thyroid cannot produce.', sideEffects: ['Palpitations', 'Weight loss', 'Tremors', 'Insomnia (if overdosed)'], takeWith: 'Take on empty stomach 30–60 min before breakfast.' },
+  hydroxychloroquine:{ uses: ['Malaria treatment & prevention', 'Rheumatoid arthritis', 'Lupus (SLE)'], howItWorks: 'Interferes with malaria parasite digestion and modulates immune response.', sideEffects: ['Nausea', 'Stomach pain', 'Headache', 'Eye changes (long-term)'], takeWith: 'Take with food or milk to reduce stomach upset.' },
+};
+
+function getPurpose(match: FDAMatch) {
+  const searchKey = [match.generic_name, match.brand_name, match.active_ingredient]
+    .join(' ').toLowerCase();
+  for (const [key, info] of Object.entries(PURPOSE_MAP)) {
+    if (searchKey.includes(key)) return info;
+  }
+  return null;
+}
+
 /* ── OpenFDA result card ────────────────────── */
 function FDAResultCard({ match, query }: { match: FDAMatch; query: string }) {
+  const purpose = getPurpose(match);
+
   if (match.has_recall) {
     return (
-      <div className="bg-orange-50 border-2 border-orange-300 rounded-xl p-5 mb-4">
-        <div className="flex items-start gap-3 mb-3">
+      <div className="bg-orange-50 border-2 border-orange-300 rounded-2xl p-5 mb-4 space-y-4">
+        <div className="flex items-start gap-3">
           <ShieldAlert className="w-7 h-7 text-orange-600 shrink-0 mt-0.5" />
           <div>
             <h3 className="font-bold text-orange-800 text-lg">⚠️ Medicine Found — BUT RECALLED</h3>
@@ -282,43 +317,79 @@ function FDAResultCard({ match, query }: { match: FDAMatch; query: string }) {
           </div>
         </div>
         {match.recall_reason && (
-          <div className="bg-orange-100 rounded-lg p-3 text-sm text-orange-800 mb-3">
+          <div className="bg-orange-100 rounded-xl p-3 text-sm text-orange-800">
             <strong>Recall reason:</strong> {match.recall_reason}
           </div>
         )}
+        {/* Purpose even for recalled medicine */}
+        {purpose && <PurposeSection purpose={purpose} />}
         <FDADetails match={match} />
       </div>
     );
   }
 
   return (
-    <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-5 mb-4">
-      <div className="flex items-start gap-3 mb-3">
+    <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-5 mb-4 space-y-4">
+      <div className="flex items-start gap-3">
         <ShieldCheck className="w-7 h-7 text-blue-600 shrink-0 mt-0.5" />
         <div>
           <h3 className="font-bold text-blue-800 text-lg">✅ Found in Global Medicine Database</h3>
           <p className="text-blue-600 text-sm mt-0.5">
-            This medicine is <strong>recognised by the FDA global database</strong> as a legitimate pharmaceutical product.
-            It is <strong>not in our local database</strong> yet — consider adding it.
+            Recognised by the <strong>FDA global database</strong> as a legitimate pharmaceutical product.
           </p>
         </div>
       </div>
+      {/* ── Purpose / Diagnosis Section ── */}
+      {purpose && <PurposeSection purpose={purpose} />}
       <FDADetails match={match} />
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Link
-          href={`/admin`}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-100 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition-colors"
-        >
+      <div className="flex flex-wrap gap-2">
+        <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-100 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition-colors">
           <Plus className="w-3.5 h-3.5" /> Add to our database
         </Link>
-        <a
-          href={`https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors"
-        >
+        <a href="https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm" target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">
           <ExternalLink className="w-3.5 h-3.5" /> View on FDA website
         </a>
+      </div>
+    </div>
+  );
+}
+
+/* ── Reusable Purpose/Diagnosis block ── */
+function PurposeSection({ purpose }: { purpose: { uses: string[]; howItWorks: string; sideEffects: string[]; takeWith: string } }) {
+  return (
+    <div className="space-y-3">
+      {/* Why taken */}
+      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+        <div className="flex items-center gap-1.5 mb-2">
+          <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">Purpose — Why This Medicine is Taken</span>
+        </div>
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {purpose.uses.map((use, i) => (
+            <span key={i} className="inline-block bg-emerald-100 text-emerald-800 text-xs font-medium px-2.5 py-1 rounded-full">{use}</span>
+          ))}
+        </div>
+        <p className="text-xs text-emerald-700 leading-relaxed">
+          <span className="font-semibold">How it works: </span>{purpose.howItWorks}
+        </p>
+      </div>
+      {/* Side effects + How to take */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="bg-red-50 border border-red-100 rounded-xl p-3">
+          <p className="text-xs font-bold text-red-600 uppercase tracking-wide mb-2">⚠️ Common Side Effects</p>
+          <ul className="space-y-0.5">
+            {purpose.sideEffects.map((s, i) => (
+              <li key={i} className="text-xs text-red-700 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-red-400 rounded-full shrink-0" />{s}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
+          <p className="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">💊 How to Take</p>
+          <p className="text-xs text-blue-700 leading-relaxed">{purpose.takeWith}</p>
+        </div>
       </div>
     </div>
   );

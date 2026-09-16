@@ -11,8 +11,7 @@ import AuthModal from './AuthModal';
 const NAV_LINKS = [
   { href: '/',           label: 'Home' },
   { href: '/verify',     label: 'Verify Medicine' },
-  { href: '/health-risk',label: 'Health Risk' },
-  { href: '/profile',    label: 'My Profile' },
+  { href: '/health-risk',label: 'Health Profile & Risk' },
   { href: '/medicines',  label: 'Medicine Database' },
   { href: '/dashboard',  label: 'Dashboard' },
 ];

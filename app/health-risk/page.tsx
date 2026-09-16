@@ -209,6 +209,8 @@ export default function HealthRiskDashboard() {
     );
   }
 
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0];
+
   return (
     <div className="min-h-screen bg-slate-50/70 pb-20">
       
@@ -238,7 +240,7 @@ export default function HealthRiskDashboard() {
               </div>
 
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Health Risk Dashboard
+                {user ? `${userName}'s Health Profile & Risk` : 'Health Profile & Risk Dashboard'}
               </h1>
               <p className="text-emerald-200/80 text-sm mt-2 max-w-xl leading-relaxed">
                 Track your active medications, tick off daily doses on your treatment calendar, and view live predicted side-effect windows.

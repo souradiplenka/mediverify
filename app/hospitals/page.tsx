@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   MapPin, Phone, Navigation, ShieldAlert, AlertTriangle, Compass,
-  Search, Filter, ExternalLink, Clock, Star, Activity, Plus, Check, Loader2, HeartPulse, Building2, RefreshCw
+  Search, Filter, ExternalLink, Clock, Star, Activity, Plus, Check, Loader2, HeartPulse, Building2, RefreshCw, Info, Lock
 } from 'lucide-react';
 import { Hospital, HOSPITALS_DATABASE, calculateDistanceKm } from '@/lib/hospitalData';
 
@@ -19,7 +19,8 @@ export default function HospitalsPage() {
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [cityInput, setCityInput] = useState('');
-  const [locationSource, setLocationSource] = useState<'GPS' | 'IP' | 'City Search' | 'Default'>('IP');
+  const [locationSource, setLocationSource] = useState<'Exact GPS' | 'IP Address' | 'City Search' | 'Default'>('IP Address');
+  const [permissionState, setPermissionState] = useState<'prompt' | 'granted' | 'denied' | 'unknown'>('unknown');
 
   // Reverse geocode lat/lng to human address using Nominatim
   const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
@@ -164,15 +165,15 @@ export default function HospitalsPage() {
     }
   };
 
-  // Manual GPS Detect Button Click
+  // Manual Exact GPS Trigger Button Click
   const handleDetectGPS = () => {
     if (!navigator.geolocation) {
-      setLocationError('Geolocation is not supported by your browser.');
+      setLocationError('Geolocation API is not supported by your browser.');
       return;
     }
 
     setLocationLoading(true);
-    setLoadingText('Requesting GPS position from device…');
+    setLoadingText('Requesting exact GPS position… Please click "Allow" in your browser popup if prompted.');
     setLocationError('');
 
     navigator.geolocation.getCurrentPosition(
@@ -180,22 +181,40 @@ export default function HospitalsPage() {
         const userLat = pos.coords.latitude;
         const userLng = pos.coords.longitude;
         setUserLocation({ lat: userLat, lng: userLng });
-        setLocationSource('GPS');
+        setLocationSource('Exact GPS');
+        setPermissionState('granted');
         const placeName = await reverseGeocode(userLat, userLng);
         await fetchRealHospitalsNear(userLat, userLng, placeName);
         setLocationLoading(false);
       },
       (err) => {
-        setLocationError('GPS permission was denied or unavailable. Type your city name in the search bar below!');
         setLocationLoading(false);
+        if (err.code === 1) {
+          setPermissionState('denied');
+          setLocationError('Location access was blocked in browser settings. Please click the lock 🔒 icon in your browser address bar and select "Allow Location".');
+        } else if (err.code === 2) {
+          setLocationError('GPS position unavailable. Please ensure Windows / Device Location Services is turned ON in Settings.');
+        } else if (err.code === 3) {
+          setLocationError('GPS request timed out. Showing location estimated from IP address.');
+        } else {
+          setLocationError('Failed to get exact GPS location. You can type your city name below.');
+        }
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      { timeout: 15000, enableHighAccuracy: true, maximumAge: 0 }
     );
   };
 
   // Auto-Detect Location on Mount (IP Fallback + GPS)
   useEffect(() => {
     let resolved = false;
+
+    // Check browser permission status if supported
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        setPermissionState(result.state);
+        result.onchange = () => setPermissionState(result.state);
+      }).catch(() => {});
+    }
 
     const resolveByIP = async () => {
       try {
@@ -210,13 +229,12 @@ export default function HospitalsPage() {
             const fullAddress = [data.city, data.region, data.country_name].filter(Boolean).join(', ');
             setUserLocation({ lat, lng });
             setUserAddress(fullAddress);
-            setLocationSource('IP');
+            setLocationSource('IP Address');
             await fetchRealHospitalsNear(lat, lng, city);
             setLocationLoading(false);
           }
         }
       } catch {
-        /* Fallback if IP API fails */
         if (!resolved) {
           const defaultLat = 20.2961;
           const defaultLng = 85.8245;
@@ -236,7 +254,8 @@ export default function HospitalsPage() {
           const userLat = pos.coords.latitude;
           const userLng = pos.coords.longitude;
           setUserLocation({ lat: userLat, lng: userLng });
-          setLocationSource('GPS');
+          setLocationSource('Exact GPS');
+          setPermissionState('granted');
           const placeName = await reverseGeocode(userLat, userLng);
           await fetchRealHospitalsNear(userLat, userLng, placeName);
           setLocationLoading(false);
@@ -246,7 +265,7 @@ export default function HospitalsPage() {
             await resolveByIP();
           }
         },
-        { timeout: 6000, enableHighAccuracy: true }
+        { timeout: 8000, enableHighAccuracy: true, maximumAge: 0 }
       );
     } else {
       resolveByIP();
@@ -256,7 +275,7 @@ export default function HospitalsPage() {
       if (!resolved) {
         resolveByIP();
       }
-    }, 4000);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -290,7 +309,7 @@ export default function HospitalsPage() {
                 Nearby Hospitals & Emergency Map
               </h1>
               <p className="text-emerald-200/80 text-sm mt-2 max-w-xl leading-relaxed">
-                Type your town or city name, or use live GPS to find real 24/7 hospitals, ICUs, and pharmacies nearest to your exact location.
+                Click <span className="text-white font-bold">"Use My Exact GPS Location"</span> or type your city name to locate real 24/7 hospitals and ICUs nearest to you.
               </p>
             </div>
 
@@ -362,7 +381,9 @@ export default function HospitalsPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] uppercase font-bold text-emerald-300 tracking-wider">Active Search Center</span>
-                  <span className="text-[10px] bg-emerald-700 text-emerald-200 px-2 py-0.5 rounded-full font-bold">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                    locationSource === 'Exact GPS' ? 'bg-emerald-500 text-white' : 'bg-emerald-800 text-emerald-200'
+                  }`}>
                     Mode: {locationSource}
                   </span>
                 </div>
@@ -375,10 +396,27 @@ export default function HospitalsPage() {
             <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
               <button
                 onClick={handleDetectGPS}
-                className="text-xs bg-emerald-800 hover:bg-emerald-700 text-emerald-200 border border-emerald-600 px-3 py-1.5 rounded-full font-semibold flex items-center gap-1 transition-all"
+                className="text-xs bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold px-4 py-2 rounded-full shadow flex items-center gap-1.5 transition-all"
               >
-                <RefreshCw className="w-3 h-3" /> Refresh GPS
+                <Compass className="w-3.5 h-3.5" /> Trigger Exact GPS
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* BROWSER PERMISSION HELP BANNER IF DENIED OR PROMPT */}
+        {permissionState === 'denied' && (
+          <div className="bg-amber-500/10 border-2 border-amber-500/40 rounded-3xl p-4 text-amber-900 flex items-start gap-3">
+            <Lock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-xs space-y-1">
+              <h4 className="font-bold text-amber-800 text-sm">Exact Device GPS Access is Blocked by Your Browser</h4>
+              <p>Your browser or Windows setting blocked location permission. To enable exact GPS pinpointing:</p>
+              <ol className="list-decimal pl-4 space-y-0.5 text-amber-800">
+                <li>Click the <strong>lock / shield 🔒 icon</strong> on the left side of your browser address bar.</li>
+                <li>Find <strong>Location</strong> and change it to <strong>"Allow"</strong>.</li>
+                <li>Ensure <strong>Windows Location Services</strong> is enabled in Windows Settings → Privacy & Security.</li>
+                <li>Click <strong>"Trigger Exact GPS"</strong> above to refresh your exact coordinates!</li>
+              </ol>
             </div>
           </div>
         )}
@@ -456,9 +494,10 @@ export default function HospitalsPage() {
           </div>
 
           {locationError && (
-            <p className="text-xs text-amber-600 mt-1 font-medium flex items-center gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> {locationError}
-            </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 text-xs text-amber-800 font-medium flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>{locationError}</span>
+            </div>
           )}
         </div>
 

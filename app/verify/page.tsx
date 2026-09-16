@@ -101,11 +101,13 @@ const INDIAN_BRANDS: Record<string, string> = {
   'tylenol': 'paracetamol', 'combiflam': 'ibuprofen', 'brufen': 'ibuprofen',
   'voveran': 'diclofenac', 'zerodol': 'aceclofenac', 'disprin': 'aspirin',
   'ecosprin': 'aspirin', 'contramal': 'tramadol', 'ultracet': 'tramadol',
-  // Antibiotics
+  // Antibiotics & Ointments
   'mox': 'amoxicillin', 'augmentin': 'amoxicillin', 'amoxil': 'amoxicillin',
   'azithral': 'azithromycin', 'zithromax': 'azithromycin', 'azee': 'azithromycin',
   'ciprobid': 'ciprofloxacin', 'ciplox': 'ciprofloxacin', 'taxim': 'cefixime',
   'cepodem': 'cefpodoxime', 'doxt': 'doxycycline', 'clavam': 'amoxicillin',
+  't-bact': 'mupirocin', 'bactroban': 'mupirocin', 'supirocin': 'mupirocin',
+  'candiderma': 'clotrimazole', 'candid': 'clotrimazole', 'betnovate': 'betamethasone',
   // Diabetes
   'glycomet': 'metformin', 'glucophage': 'metformin', 'gluconorm': 'metformin',
   'amaryl': 'glimepiride', 'glimpid': 'glimepiride', 'januvia': 'sitagliptin',
@@ -332,35 +334,75 @@ function ResultBanner({ medicine }: { medicine: Medicine }) {
 
 /* ── Drug purpose lookup by generic/brand name ── */
 const PURPOSE_MAP: Record<string, { uses: string[]; howItWorks: string; sideEffects: string[]; takeWith: string }> = {
+  // Topical Antibiotics & Ointments
+  mupirocin:         { uses: ['Impetigo (skin infection)', 'Bacterial skin infections', 'Staph & Strep skin infections', 'Infected cuts & wounds'], howItWorks: 'Topical antibiotic — blocks bacterial isoleucyl-tRNA synthetase enzyme, stopping bacterial growth.', sideEffects: ['Burning or stinging at application site', 'Itching', 'Rash', 'Dry skin'], takeWith: 'Apply a thin layer to the affected skin area 2 to 3 times daily for 5 to 10 days.' },
+  clotrimazole:      { uses: ['Fungal skin infections', 'Ringworm (Tinea)', 'Athlete\'s foot', 'Jock itch', 'Thrush'], howItWorks: 'Antifungal — damages fungal cell membranes causing cell contents to leak out.', sideEffects: ['Mild burning', 'Redness', 'Skin irritation'], takeWith: 'Apply to clean, dry affected skin twice daily.' },
+  betamethasone:     { uses: ['Eczema', 'Psoriasis', 'Severe skin inflammation', 'Allergic dermatitis'], howItWorks: 'Topical corticosteroid — reduces swelling, redness, and itching in skin cells.', sideEffects: ['Skin thinning with long use', 'Burning', 'Stretch marks'], takeWith: 'Apply sparingly to affected areas as prescribed. Avoid face/eyes.' },
+
+  // Antacids / PPI
   rabeprazole:       { uses: ['Acid reflux (GERD)', 'Stomach ulcers', 'Heartburn', 'H. pylori infection'], howItWorks: 'Blocks the proton pump in the stomach lining to reduce acid production.', sideEffects: ['Headache', 'Diarrhoea', 'Nausea', 'Stomach pain'], takeWith: 'Take 30 min before meals. Swallow whole — do not crush.' },
   pantoprazole:      { uses: ['Acid reflux (GERD)', 'Gastric ulcers', 'Heartburn', 'Esophagitis'], howItWorks: 'Proton pump inhibitor — reduces stomach acid by blocking the acid-secreting enzyme.', sideEffects: ['Headache', 'Diarrhoea', 'Nausea', 'Dizziness'], takeWith: 'Take before breakfast with or without food.' },
   omeprazole:        { uses: ['Acid reflux', 'Peptic ulcers', 'Heartburn', 'Stomach protection'], howItWorks: 'Irreversibly blocks the H+/K+ ATPase enzyme in gastric cells to reduce acid.', sideEffects: ['Headache', 'Nausea', 'Diarrhoea', 'Constipation'], takeWith: 'Take 30–60 minutes before a meal.' },
   esomeprazole:      { uses: ['GERD', 'Erosive esophagitis', 'H. pylori eradication', 'Zollinger-Ellison syndrome'], howItWorks: 'S-isomer of omeprazole — potent proton pump inhibitor reducing gastric acid.', sideEffects: ['Headache', 'Nausea', 'Diarrhoea', 'Flatulence'], takeWith: 'Take 1 hour before meals.' },
+
+  // Pain / Fever
   paracetamol:       { uses: ['Fever', 'Headache', 'Mild to moderate pain', 'Cold & flu', 'Toothache', 'Body ache'], howItWorks: 'Blocks pain signals in brain and lowers body temperature via hypothalamus.', sideEffects: ['Generally well tolerated', 'Liver damage if overdosed'], takeWith: 'Can be taken with or without food. Max 4g/day for adults.' },
   ibuprofen:         { uses: ['Pain relief', 'Fever', 'Inflammation', 'Arthritis', 'Menstrual cramps'], howItWorks: 'NSAID — blocks COX-1 and COX-2 enzymes that produce pain-causing prostaglandins.', sideEffects: ['Stomach upset', 'Heartburn', 'Nausea', 'Risk of stomach bleeding'], takeWith: 'Always take after food or milk to protect the stomach.' },
+  diclofenac:        { uses: ['Joint pain', 'Rheumatoid arthritis', 'Osteoarthritis', 'Post-surgery pain'], howItWorks: 'Potent NSAID — inhibits prostaglandin synthesis to reduce joint pain and swelling.', sideEffects: ['Stomach pain', 'Indigestion', 'Dizziness', 'Headache'], takeWith: 'Take with or after food with a glass of water.' },
+  aceclofenac:       { uses: ['Rheumatoid arthritis', 'Osteoarthritis', 'Ankylosing spondylitis', 'Dental pain'], howItWorks: 'NSAID — inhibits COX enzyme involved in joint inflammation and pain.', sideEffects: ['Nausea', 'Stomach pain', 'Diarrhoea', 'Dizziness'], takeWith: 'Take after meals to protect the stomach.' },
+
+  // Antibiotics
   amoxicillin:       { uses: ['Throat infections', 'Ear infections', 'Pneumonia', 'UTI', 'Skin infections'], howItWorks: 'Beta-lactam antibiotic — kills bacteria by destroying their cell wall.', sideEffects: ['Nausea', 'Diarrhoea', 'Skin rash', 'Allergic reaction'], takeWith: 'Complete the full course even if feeling better.' },
   azithromycin:      { uses: ['Respiratory infections', 'Pneumonia', 'Sinusitis', 'Skin infections', 'STIs'], howItWorks: 'Macrolide antibiotic — prevents bacteria from making essential proteins.', sideEffects: ['Nausea', 'Diarrhoea', 'Stomach pain', 'Headache'], takeWith: 'Take once daily on empty stomach or with food.' },
   ciprofloxacin:     { uses: ['UTI', 'Respiratory infections', 'Typhoid fever', 'Traveller\'s diarrhoea'], howItWorks: 'Fluoroquinolone — damages bacterial DNA gyrase preventing bacteria from replicating.', sideEffects: ['Nausea', 'Diarrhoea', 'Headache', 'Dizziness'], takeWith: 'Take with plenty of water. Avoid antacids within 2 hours.' },
+  doxycycline:       { uses: ['Acne', 'Respiratory infections', 'Lyme disease', 'Chlamydia', 'Malaria prophylaxis'], howItWorks: 'Tetracycline antibiotic — inhibits bacterial protein synthesis.', sideEffects: ['Nausea', 'Vomiting', 'Sun sensitivity', 'Esophageal irritation'], takeWith: 'Take with a full glass of water. Stay upright for 30 minutes.' },
+
+  // Diabetes & BP
   metformin:         { uses: ['Type 2 Diabetes', 'Prediabetes', 'PCOS', 'Insulin resistance'], howItWorks: 'Reduces glucose production in liver, improves insulin sensitivity, slows sugar absorption.', sideEffects: ['Nausea', 'Diarrhoea', 'Stomach upset', 'Metallic taste'], takeWith: 'Always take with or just after meals.' },
   atorvastatin:      { uses: ['High cholesterol', 'High triglycerides', 'Heart attack prevention', 'Stroke prevention'], howItWorks: 'Statin — blocks HMG-CoA reductase enzyme in liver that produces cholesterol.', sideEffects: ['Muscle pain', 'Headache', 'Nausea', 'Joint pain'], takeWith: 'Take at night. Can take with or without food.' },
   rosuvastatin:      { uses: ['High LDL cholesterol', 'Low HDL', 'High triglycerides', 'Heart disease prevention'], howItWorks: 'Most potent statin — strongly inhibits cholesterol synthesis in the liver.', sideEffects: ['Muscle pain', 'Headache', 'Constipation', 'Nausea'], takeWith: 'Can be taken at any time of day.' },
   telmisartan:       { uses: ['Hypertension', 'Heart failure', 'Stroke prevention', 'Kidney protection in diabetes'], howItWorks: 'ARB — blocks angiotensin II from narrowing blood vessels, lowering blood pressure.', sideEffects: ['Dizziness', 'Low blood pressure', 'Headache', 'Back pain'], takeWith: 'Take at the same time daily with or without food.' },
   amlodipine:        { uses: ['High blood pressure', 'Angina (chest pain)', 'Coronary artery disease'], howItWorks: 'Calcium channel blocker — relaxes blood vessels and reduces heart workload.', sideEffects: ['Ankle swelling', 'Flushing', 'Headache', 'Dizziness'], takeWith: 'Take once daily. Can be taken with or without food.' },
+
+  // Allergy & Respiratory
   cetirizine:        { uses: ['Seasonal allergies', 'Hay fever', 'Hives', 'Skin itching', 'Runny nose', 'Watery eyes'], howItWorks: 'Antihistamine — blocks H1 receptors preventing histamine from causing allergic symptoms.', sideEffects: ['Drowsiness', 'Dry mouth', 'Headache', 'Fatigue'], takeWith: 'Take at night — may cause drowsiness.' },
   montelukast:       { uses: ['Asthma prevention', 'Seasonal allergies', 'Allergic rhinitis', 'Exercise-induced asthma'], howItWorks: 'Blocks leukotriene receptors, reducing swelling and tightening in airways.', sideEffects: ['Headache', 'Stomach pain', 'Mood changes (rare)'], takeWith: 'Take in the evening for asthma.' },
+
+  // Blood & Thyroid
   aspirin:           { uses: ['Heart attack prevention', 'Stroke prevention', 'Pain relief', 'Fever', 'Anti-inflammatory'], howItWorks: 'Irreversibly blocks COX enzymes — reduces platelet aggregation and prostaglandins.', sideEffects: ['Stomach irritation', 'Bleeding risk', 'Heartburn', 'Nausea'], takeWith: 'Take with food or milk. Low dose for heart — do not crush.' },
   clopidogrel:       { uses: ['Heart attack prevention', 'Stroke prevention', 'After stent placement', 'Peripheral artery disease'], howItWorks: 'Antiplatelet — blocks P2Y12 receptor on platelets preventing dangerous blood clots.', sideEffects: ['Bleeding', 'Bruising', 'Stomach pain', 'Headache'], takeWith: 'Take daily at the same time. Never stop without doctor advice.' },
   levothyroxine:     { uses: ['Hypothyroidism (underactive thyroid)', 'Goitre', 'Thyroid cancer (post-surgery)'], howItWorks: 'Synthetic thyroid hormone replacing T4 the thyroid cannot produce.', sideEffects: ['Palpitations', 'Weight loss', 'Tremors', 'Insomnia (if overdosed)'], takeWith: 'Take on empty stomach 30–60 min before breakfast.' },
   hydroxychloroquine:{ uses: ['Malaria treatment & prevention', 'Rheumatoid arthritis', 'Lupus (SLE)'], howItWorks: 'Interferes with malaria parasite digestion and modulates immune response.', sideEffects: ['Nausea', 'Stomach pain', 'Headache', 'Eye changes (long-term)'], takeWith: 'Take with food or milk to reduce stomach upset.' },
 };
 
-function getPurpose(match: FDAMatch) {
+function getPurpose(match: FDAMatch): { uses: string[]; howItWorks: string; sideEffects: string[]; takeWith: string } {
   const searchKey = [match.generic_name, match.brand_name, match.active_ingredient]
     .join(' ').toLowerCase();
+
+  // 1. Direct dictionary match
   for (const [key, info] of Object.entries(PURPOSE_MAP)) {
     if (searchKey.includes(key)) return info;
   }
-  return null;
+
+  // 2. Smart dynamic fallback so EVERY medicine displays Purpose
+  const isTopical = (match.route || '').toLowerCase().includes('topical') || 
+                    searchKey.includes('cream') || searchKey.includes('ointment') || searchKey.includes('gel');
+
+  if (isTopical) {
+    return {
+      uses: [`Topical treatment of ${match.generic_name || match.brand_name}`, 'Skin condition / infection management', 'Local application therapy'],
+      howItWorks: `Topical formulation (${match.product_type || 'Medicine'}) containing ${match.active_ingredient || match.generic_name || match.brand_name} for direct skin application.`,
+      sideEffects: ['Local skin irritation', 'Mild burning, itching, or redness'],
+      takeWith: 'Apply a thin layer to clean, dry affected skin area as directed by package or physician.'
+    };
+  }
+
+  return {
+    uses: [`Treatment of conditions indicated for ${match.generic_name || match.brand_name}`, match.product_type || 'Prescription medication', 'Targeted medical therapy'],
+    howItWorks: `Pharmaceutical formulation (${match.generic_name || match.brand_name}) administered via ${match.route || 'prescribed'} route for systemic therapeutic action.`,
+    sideEffects: ['Refer to official prescription insert for complete side effect profile', 'Consult your prescribing doctor or pharmacist'],
+    takeWith: 'Use strictly as directed by your healthcare provider or package instructions.'
+  };
 }
 
 /* ── OpenFDA result card ────────────────────── */

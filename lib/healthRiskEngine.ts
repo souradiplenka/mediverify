@@ -1,3 +1,5 @@
+import { supabase } from '@/lib/supabase';
+
 export interface CabinetMedicine {
   id: string;
   name: string;
@@ -258,3 +260,36 @@ export function analyzeCabinetRisk(cabinet: CabinetMedicine[]): RiskAnalysisResu
     recommendations,
   };
 }
+
+/* ── Supabase Cloud Cabinet Sync Helpers ── */
+export async function fetchUserCabinetFromCloud(userId: string): Promise<CabinetMedicine[] | null> {
+  try {
+    const { data, error } = await supabase
+      .from('user_cabinets')
+      .select('cabinet_data')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return data.cabinet_data as CabinetMedicine[];
+  } catch {
+    return null;
+  }
+}
+
+export async function saveUserCabinetToCloud(userId: string, cabinet: CabinetMedicine[]): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('user_cabinets')
+      .upsert({
+        user_id: userId,
+        cabinet_data: cabinet,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+
+    return !error;
+  } catch {
+    return false;
+  }
+}
+

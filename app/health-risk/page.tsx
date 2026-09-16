@@ -5,15 +5,22 @@ import Link from 'next/link';
 import {
   ShieldAlert, ShieldCheck, AlertTriangle, Trash2, Plus, RefreshCw,
   Stethoscope, Activity, Calendar, Pill, Info, ArrowRight, HeartPulse,
-  Sparkles, CheckCircle2, AlertOctagon, HelpCircle
+  Sparkles, CheckCircle2, AlertOctagon, HelpCircle, User, LogIn, Cloud, CloudOff, Check
 } from 'lucide-react';
 import {
-  CabinetMedicine, SAMPLE_CABINET, analyzeCabinetRisk, RiskAnalysisResult
+  CabinetMedicine, SAMPLE_CABINET, analyzeCabinetRisk, RiskAnalysisResult,
+  fetchUserCabinetFromCloud, saveUserCabinetToCloud
 } from '@/lib/healthRiskEngine';
+import { supabase } from '@/lib/supabase';
+import { User as SupabaseUser } from '@supabase/supabase-js';
+import AuthModal from '@/components/AuthModal';
 
 export default function HealthRiskDashboard() {
   const [cabinet, setCabinet] = useState<CabinetMedicine[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   // Form state to add new medicine manually
   const [showAddModal, setShowAddModal] = useState(false);
@@ -24,30 +31,74 @@ export default function HealthRiskDashboard() {
   const [newDosage, setNewDosage] = useState('');
   const [newExpiry, setNewExpiry] = useState('');
 
-  // Load cabinet from localStorage on mount
+  // Initial load & Auth Listener
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('mediverify_cabinet');
-      if (saved) {
-        setCabinet(JSON.parse(saved));
+    async function initAuthAndCabinet() {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      setUser(currentUser);
+
+      if (currentUser) {
+        // Try loading from Supabase cloud
+        const cloudData = await fetchUserCabinetFromCloud(currentUser.id);
+        if (cloudData && cloudData.length > 0) {
+          setCabinet(cloudData);
+        } else {
+          // Fallback to local storage if empty in cloud
+          const saved = localStorage.getItem('mediverify_cabinet');
+          const localCab = saved ? JSON.parse(saved) : SAMPLE_CABINET;
+          setCabinet(localCab);
+          await saveUserCabinetToCloud(currentUser.id, localCab);
+        }
       } else {
-        // Default to sample cabinet if empty
-        setCabinet(SAMPLE_CABINET);
-        localStorage.setItem('mediverify_cabinet', JSON.stringify(SAMPLE_CABINET));
+        // Unauthenticated guest mode — use localStorage
+        try {
+          const saved = localStorage.getItem('mediverify_cabinet');
+          setCabinet(saved ? JSON.parse(saved) : SAMPLE_CABINET);
+        } catch {
+          setCabinet(SAMPLE_CABINET);
+        }
       }
-    } catch {
-      setCabinet(SAMPLE_CABINET);
-    } finally {
       setLoading(false);
     }
+
+    initAuthAndCabinet();
+
+    // Auth change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        setSyncing(true);
+        const cloudData = await fetchUserCabinetFromCloud(currentUser.id);
+        if (cloudData && cloudData.length > 0) {
+          setCabinet(cloudData);
+        } else {
+          const saved = localStorage.getItem('mediverify_cabinet');
+          const localCab = saved ? JSON.parse(saved) : SAMPLE_CABINET;
+          setCabinet(localCab);
+          await saveUserCabinetToCloud(currentUser.id, localCab);
+        }
+        setSyncing(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Save to localStorage on change
-  const updateCabinet = (newCabinet: CabinetMedicine[]) => {
+  // Save changes locally and to cloud if logged in
+  const updateCabinet = async (newCabinet: CabinetMedicine[]) => {
     setCabinet(newCabinet);
     try {
       localStorage.setItem('mediverify_cabinet', JSON.stringify(newCabinet));
     } catch { /* storage full */ }
+
+    if (user) {
+      setSyncing(true);
+      await saveUserCabinetToCloud(user.id, newCabinet);
+      setSyncing(false);
+    }
   };
 
   const handleAddMedicine = (e: React.FormEvent) => {
@@ -88,12 +139,13 @@ export default function HealthRiskDashboard() {
   };
 
   const riskResult: RiskAnalysisResult = analyzeCabinetRisk(cabinet);
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0];
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex items-center gap-3 text-emerald-800">
-          <HeartPulse className="w-6 h-6 animate-pulse" />
+          <HeartPulse className="w-6 h-6 animate-pulse text-emerald-600" />
           <span className="font-semibold text-sm">Analyzing health risk parameters…</span>
         </div>
       </div>
@@ -110,11 +162,27 @@ export default function HealthRiskDashboard() {
           
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 bg-emerald-900/80 border border-emerald-700/60 px-3 py-1 rounded-full text-xs font-semibold text-emerald-300 mb-3">
-                <HeartPulse className="w-3.5 h-3.5 text-emerald-400" /> Personal Safety Intelligence
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="inline-flex items-center gap-2 bg-emerald-900/80 border border-emerald-700/60 px-3 py-1 rounded-full text-xs font-semibold text-emerald-300">
+                  <HeartPulse className="w-3.5 h-3.5 text-emerald-400" /> Personal Safety Intelligence
+                </span>
+                
+                {user ? (
+                  <span className="inline-flex items-center gap-1.5 bg-emerald-800/90 border border-emerald-600/80 px-3 py-1 rounded-full text-xs font-semibold text-emerald-100">
+                    <Cloud className="w-3 h-3 text-emerald-400" /> Cloud Synced ({userName})
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setAuthModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 px-3 py-1 rounded-full text-xs font-semibold text-amber-200 transition-colors"
+                  >
+                    <CloudOff className="w-3 h-3 text-amber-300" /> Guest Mode (Click to Sign In)
+                  </button>
+                )}
               </div>
+
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Personal Health Risk Dashboard
+                {user ? `${userName}'s Health Risk Dashboard` : 'Personal Health Risk Dashboard'}
               </h1>
               <p className="text-emerald-200/80 text-sm mt-2 max-w-xl leading-relaxed">
                 Monitor your active medicine cabinet for dangerous drug-drug interactions, expired drugs, and counterfeit exposure in real-time.
@@ -123,6 +191,14 @@ export default function HealthRiskDashboard() {
 
             {/* Quick Actions */}
             <div className="flex flex-wrap gap-2 shrink-0">
+              {!user && (
+                <button
+                  onClick={() => setAuthModalOpen(true)}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-4 py-2.5 rounded-full transition-all shadow-lg flex items-center gap-2 border border-emerald-400/30"
+                >
+                  <LogIn className="w-4 h-4" /> Sign In / Sync Cloud
+                </button>
+              )}
               <button
                 onClick={() => setShowAddModal(true)}
                 className="bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-sm px-4 py-2.5 rounded-full transition-all shadow-lg flex items-center gap-2"
@@ -190,8 +266,9 @@ export default function HealthRiskDashboard() {
                 <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Cabinet Health Breakdown
                 </h3>
-                <span className="text-xs text-gray-400 font-medium">
+                <span className="text-xs text-gray-400 font-medium flex items-center gap-1">
                   {cabinet.length} Medicine{cabinet.length === 1 ? '' : 's'} Logged
+                  {syncing && <span className="text-emerald-600 font-bold ml-1 animate-pulse">Syncing…</span>}
                 </span>
               </div>
 
@@ -246,7 +323,7 @@ export default function HealthRiskDashboard() {
           </div>
         </div>
 
-        {/* ── DRUG INTERACTION ALERTS (If any) ── */}
+        {/* ── DRUG INTERACTION ALERTS ── */}
         {riskResult.detectedInteractions.length > 0 && (
           <div className="mb-8">
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2" style={{ fontFamily: 'Playfair Display, serif' }}>
@@ -295,7 +372,9 @@ export default function HealthRiskDashboard() {
               <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                 My Medicine Cabinet
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">Manage medications currently kept in your household.</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {user ? `Cloud synced to ${user.email}` : 'Stored locally in browser (Sign in to sync across devices)'}
+              </p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -482,6 +561,12 @@ export default function HealthRiskDashboard() {
           </div>
         </div>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+      />
 
     </div>
   );

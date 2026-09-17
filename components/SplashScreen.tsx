@@ -3,67 +3,84 @@
 import { useState, useEffect } from 'react';
 
 export default function SplashScreen({ onDone }: { onDone: () => void }) {
-  const [phase, setPhase] = useState<'loading' | 'reveal' | 'exit'>('loading');
-  const [progress, setProgress] = useState(0);
+  const [counter, setCounter] = useState(0);
+  const [exit, setExit] = useState(false);
 
   useEffect(() => {
-    // Animate progress bar from 0 → 100 over ~2.2 seconds
-    let start: number | null = null;
-    const duration = 2200;
+    // Tick counter 0 → 100 over ~2.4 seconds
+    const totalMs = 2400;
+    const interval = totalMs / 100;
+    let current = 0;
 
-    const tick = (timestamp: number) => {
-      if (!start) start = timestamp;
-      const elapsed = timestamp - start;
-      const pct = Math.min((elapsed / duration) * 100, 100);
-      setProgress(pct);
-
-      if (pct < 100) {
-        requestAnimationFrame(tick);
-      } else {
-        // Small pause then transition to reveal phase
-        setTimeout(() => setPhase('reveal'), 300);
-        setTimeout(() => setPhase('exit'), 900);
-        setTimeout(() => onDone(), 1500);
+    const timer = setInterval(() => {
+      current += 1;
+      setCounter(current);
+      if (current >= 100) {
+        clearInterval(timer);
+        // Small hold, then trigger curtain wipe-up exit
+        setTimeout(() => setExit(true), 300);
+        // After wipe animation (~900ms), call done
+        setTimeout(() => onDone(), 1200);
       }
-    };
+    }, interval);
 
-    const raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => clearInterval(timer);
   }, [onDone]);
 
   return (
-    <div
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center transition-all duration-700 ease-in-out overflow-hidden ${
-        phase === 'exit' ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
-      }`}
-      style={{ background: 'linear-gradient(135deg, #022c22 0%, #064e3b 40%, #065f46 70%, #047857 100%)' }}
-    >
-      {/* Animated dot grid background */}
-      <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:22px_22px]" />
-
-      {/* Floating glow orbs */}
-      <div className="absolute w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl top-[-80px] right-[-80px] animate-pulse" />
-      <div className="absolute w-80 h-80 bg-emerald-300/10 rounded-full blur-3xl bottom-[-60px] left-[-60px] animate-pulse" style={{ animationDelay: '0.8s' }} />
-      <div className="absolute w-56 h-56 bg-teal-400/10 rounded-full blur-3xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col items-center text-center px-8">
-
-        {/* Shield / Logo icon */}
+    <>
+      {/* ── Curtain panel — slides up to reveal site ── */}
+      <div
+        className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
+        style={{
+          background: '#030303',
+          transition: exit ? 'transform 0.9s cubic-bezier(0.76, 0, 0.24, 1)' : 'none',
+          transform: exit ? 'translateY(-100%)' : 'translateY(0%)',
+        }}
+      >
+        {/* Subtle noise grain texture */}
         <div
-          className={`transition-all duration-700 ${
-            phase === 'loading' ? 'opacity-0 translate-y-8 scale-90' : 'opacity-100 translate-y-0 scale-100'
-          }`}
-          style={{ transitionDelay: '100ms' }}
-        >
-          <div className="relative w-24 h-24 mb-8">
-            {/* Outer pulsing ring */}
-            <div className="absolute inset-0 rounded-full border-2 border-emerald-400/40 animate-ping" />
-            {/* Inner ring */}
-            <div className="absolute inset-1 rounded-full border border-emerald-300/20" />
-            {/* Icon container */}
-            <div className="absolute inset-2 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-emerald-900/60">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10">
+          className="absolute inset-0 pointer-events-none opacity-[0.04]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'repeat',
+            backgroundSize: '200px 200px',
+          }}
+        />
+
+        {/* Very faint green radial glow behind logo */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            width: '480px',
+            height: '480px',
+            background: 'radial-gradient(circle, rgba(16,185,129,0.07) 0%, transparent 70%)',
+            borderRadius: '50%',
+          }}
+        />
+
+        {/* ── Centre content ── */}
+        <div className="relative z-10 flex flex-col items-center select-none">
+
+          {/* Logo icon */}
+          <div
+            className="mb-8"
+            style={{
+              opacity: exit ? 0 : 1,
+              transition: 'opacity 0.3s ease',
+            }}
+          >
+            <div
+              className="flex items-center justify-center"
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: '20px',
+                background: 'linear-gradient(135deg, #064e3b 0%, #10b981 100%)',
+                boxShadow: '0 0 40px rgba(16,185,129,0.25)',
+              }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: 36, height: 36 }}>
                 <path
                   d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z"
                   fill="white"
@@ -72,89 +89,125 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
                 <path
                   d="M9 12l2 2 4-4"
                   stroke="#064e3b"
-                  strokeWidth="2"
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
             </div>
           </div>
-        </div>
 
-        {/* Brand name */}
-        <div
-          className={`transition-all duration-700 ${
-            phase === 'loading' ? 'opacity-0 translate-y-6' : 'opacity-100 translate-y-0'
-          }`}
-          style={{ transitionDelay: '250ms' }}
-        >
+          {/* Brand name */}
           <h1
-            className="text-5xl sm:text-6xl font-black text-white tracking-tight mb-1"
-            style={{ fontFamily: 'Playfair Display, serif' }}
+            style={{
+              fontFamily: 'Playfair Display, Georgia, serif',
+              fontSize: '2.6rem',
+              fontWeight: 700,
+              color: '#ffffff',
+              letterSpacing: '-0.02em',
+              lineHeight: 1,
+              margin: 0,
+              opacity: exit ? 0 : 1,
+              transition: 'opacity 0.3s ease',
+            }}
           >
-            Medi<span className="text-emerald-400">Verify</span>
+            Medi<span style={{ color: '#10b981' }}>Verify</span>
           </h1>
-          <p className="text-emerald-300/70 text-sm font-medium tracking-[0.3em] uppercase mb-1">
-            Healthcare Protection System
-          </p>
-        </div>
 
-        {/* Tagline */}
-        <div
-          className={`transition-all duration-700 ${
-            phase === 'loading' ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
-          }`}
-          style={{ transitionDelay: '450ms' }}
-        >
-          <p className="text-emerald-100/50 text-xs mt-4 max-w-xs leading-relaxed">
-            Protecting lives through authentic medicine verification
+          {/* Subtitle */}
+          <p
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '0.7rem',
+              fontWeight: 500,
+              color: 'rgba(255,255,255,0.25)',
+              letterSpacing: '0.28em',
+              textTransform: 'uppercase',
+              marginTop: '10px',
+              opacity: exit ? 0 : 1,
+              transition: 'opacity 0.3s ease',
+            }}
+          >
+            Healthcare Protection
           </p>
-        </div>
 
-        {/* Progress bar area */}
-        <div className="mt-14 w-64 sm:w-80">
-          {/* Progress track */}
-          <div className="h-0.5 bg-white/10 rounded-full overflow-hidden">
+          {/* Thin progress line */}
+          <div
+            style={{
+              marginTop: '52px',
+              width: '160px',
+              height: '1px',
+              background: 'rgba(255,255,255,0.06)',
+              borderRadius: '999px',
+              overflow: 'hidden',
+              opacity: exit ? 0 : 1,
+              transition: 'opacity 0.3s ease',
+            }}
+          >
             <div
-              className="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 rounded-full transition-none"
               style={{
-                width: `${progress}%`,
-                boxShadow: '0 0 12px rgba(52,211,153,0.8)',
+                height: '100%',
+                width: `${counter}%`,
+                background: 'linear-gradient(90deg, #10b981, #34d399)',
+                borderRadius: '999px',
+                boxShadow: '0 0 10px rgba(16,185,129,0.6)',
+                transition: 'width 0.04s linear',
               }}
             />
           </div>
 
-          {/* Loading dots + percentage */}
-          <div className="flex items-center justify-between mt-3">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-            </div>
-            <span className="text-[11px] text-emerald-300/60 font-mono tabular-nums">
-              {Math.round(progress)}%
-            </span>
-          </div>
+          {/* Counter */}
+          <p
+            style={{
+              fontFamily: '"Inter", monospace',
+              fontSize: '0.65rem',
+              fontWeight: 400,
+              color: 'rgba(255,255,255,0.18)',
+              letterSpacing: '0.12em',
+              marginTop: '14px',
+              opacity: exit ? 0 : 1,
+              transition: 'opacity 0.3s ease',
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {String(counter).padStart(2, '0')} / 100
+          </p>
+
         </div>
 
-        {/* Bottom trust badges */}
+        {/* Bottom-left: tiny version tag */}
         <div
-          className={`mt-16 flex items-center gap-6 transition-all duration-700 ${
-            phase === 'loading' ? 'opacity-0' : 'opacity-100'
-          }`}
-          style={{ transitionDelay: '600ms' }}
+          style={{
+            position: 'absolute',
+            bottom: '28px',
+            left: '32px',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '0.6rem',
+            color: 'rgba(255,255,255,0.12)',
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+          }}
         >
-          {['WHO Standards', 'CDSCO Verified', '24/7 Active'].map((badge) => (
-            <div key={badge} className="flex items-center gap-1.5 text-emerald-400/50">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span className="text-[10px] font-medium tracking-wide">{badge}</span>
-            </div>
-          ))}
+          v1.0
+        </div>
+
+        {/* Bottom-right: tagline */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '28px',
+            right: '32px',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '0.6rem',
+            color: 'rgba(255,255,255,0.12)',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Protecting Lives
         </div>
 
       </div>
-    </div>
+    </>
   );
 }

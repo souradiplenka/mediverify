@@ -17,6 +17,7 @@ export interface MedicationTrack {
   dosage?: string;
   startDate: string;         // YYYY-MM-DD
   durationDays: number;       // Target days e.g. 5, 7, 14, 30
+  expiryDate?: string;        // YYYY-MM-DD Batch Expiry Date
   completedDates: string[];   // Array of YYYY-MM-DD dates ticked off by user
   isRecovered: boolean;       // Marked true when user recovers
   recoveredAt?: string;       // Date user marked recovered
@@ -29,6 +30,61 @@ export interface RiskPrediction {
   activeSideEffects: string[];
   durationWarnings: string[];
   overallRiskLevel: 'low' | 'moderate' | 'high' | 'critical';
+  expiryInfo?: ReturnType<typeof checkMedicationExpiryStatus>;
+}
+
+/* ── Check Medication Expiry Status & Generate Alerts ── */
+export function checkMedicationExpiryStatus(expiryDate?: string): {
+  isExpired: boolean;
+  isExpiringSoon: boolean;
+  daysRemaining: number | null;
+  formattedDate: string;
+  alertMessage: string | null;
+  severity: 'none' | 'warning' | 'danger';
+} {
+  if (!expiryDate) {
+    return { isExpired: false, isExpiringSoon: false, daysRemaining: null, formattedDate: '', alertMessage: null, severity: 'none' };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const exp = new Date(expiryDate);
+  exp.setHours(0, 0, 0, 0);
+
+  const diffMs = exp.getTime() - today.getTime();
+  const daysRemaining = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  const formattedDate = exp.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  if (daysRemaining < 0) {
+    return {
+      isExpired: true,
+      isExpiringSoon: false,
+      daysRemaining,
+      formattedDate,
+      alertMessage: `🚨 CRITICAL ALERT: Medicine expired on ${formattedDate} (${Math.abs(daysRemaining)} days ago)! Consuming expired medicine can cause toxic degradation or lack of efficacy. Discard immediately.`,
+      severity: 'danger',
+    };
+  }
+
+  if (daysRemaining <= 30) {
+    return {
+      isExpired: false,
+      isExpiringSoon: true,
+      daysRemaining,
+      formattedDate,
+      alertMessage: `⚠️ EXPIRING SOON: Medicine expires on ${formattedDate} (only ${daysRemaining} day${daysRemaining === 1 ? '' : 's'} remaining). Please replace your stock soon!`,
+      severity: 'warning',
+    };
+  }
+
+  return {
+    isExpired: false,
+    isExpiringSoon: false,
+    daysRemaining,
+    formattedDate,
+    alertMessage: null,
+    severity: 'none',
+  };
 }
 
 /* ── Default Clean Patient Profile for New Visitors ── */
@@ -51,6 +107,7 @@ export const SAMPLE_MEDICATION_TRACKS: MedicationTrack[] = [
     dosage: '20mg Once Daily',
     startDate: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0], // 3 days ago
     durationDays: 7,
+    expiryDate: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0], // Expiring in 15 days!
     completedDates: [
       new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
       new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
@@ -66,8 +123,9 @@ export const SAMPLE_MEDICATION_TRACKS: MedicationTrack[] = [
     active_ingredient: 'Ibuprofen 400mg + Paracetamol 325mg',
     category: 'NSAID',
     dosage: '400mg Twice Daily',
-    startDate: new Date(Date.now() - 8 * 86400000).toISOString().split('T')[0], // 8 days ago!
+    startDate: new Date(Date.now() - 8 * 86400000).toISOString().split('T')[0], // 8 days ago
     durationDays: 5,
+    expiryDate: new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0], // Valid 6 months
     completedDates: [
       new Date(Date.now() - 8 * 86400000).toISOString().split('T')[0],
       new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0],
@@ -98,7 +156,17 @@ export function predictMedicationRiskAndEffects(track: MedicationTrack, profile?
   const durationWarnings: string[] = [];
   let overallRiskLevel: 'low' | 'moderate' | 'high' | 'critical' = 'low';
 
-  // 1. Evaluate Benefits & Side Effects Timeline
+  // 1. Evaluate Expiry Date Alerts
+  const expiryInfo = checkMedicationExpiryStatus(track.expiryDate);
+  if (expiryInfo.isExpired) {
+    durationWarnings.push(`🚨 CRITICAL EXPIRED MEDICINE ALERT: Expired on ${expiryInfo.formattedDate} (${Math.abs(expiryInfo.daysRemaining!)} days ago)! Consuming expired medicine is dangerous. Discard immediately.`);
+    overallRiskLevel = 'critical';
+  } else if (expiryInfo.isExpiringSoon) {
+    durationWarnings.push(`⚠️ EXPIRING SOON WARNING: Expiring on ${expiryInfo.formattedDate} (only ${expiryInfo.daysRemaining} days remaining). Replace stock soon.`);
+    if (overallRiskLevel === 'low') overallRiskLevel = 'moderate';
+  }
+
+  // 2. Evaluate Benefits & Side Effects Timeline
   if (activeIngredient.includes('rabeprazole') || activeIngredient.includes('pantoprazole') || activeIngredient.includes('omeprazole') || category.includes('antacid')) {
     expectedBenefits = currentDayNum <= 2 
       ? 'Initial reduction in stomach acid production (30-60 min post dose).'
@@ -113,7 +181,7 @@ export function predictMedicationRiskAndEffects(track: MedicationTrack, profile?
 
     if (currentDayNum > 30) {
       durationWarnings.push('⚠️ Over-use Warning: Taking PPI antacids continuously for >30 days can impair Vitamin B12 and Magnesium absorption.');
-      overallRiskLevel = 'high';
+      if (overallRiskLevel !== 'critical') overallRiskLevel = 'high';
     }
   } 
   else if (activeIngredient.includes('ibuprofen') || activeIngredient.includes('diclofenac') || category.includes('nsaid')) {
@@ -139,7 +207,7 @@ export function predictMedicationRiskAndEffects(track: MedicationTrack, profile?
 
     if (track.completedDates.length < 5 && track.completedDates.length < track.durationDays) {
       durationWarnings.push('⚠️ Early Stop Warning: Stopping antibiotics before completing the 5-7 day course leads to antibiotic resistance.');
-      overallRiskLevel = 'high';
+      if (overallRiskLevel !== 'critical') overallRiskLevel = 'high';
     }
   }
   else if (activeIngredient.includes('paracetamol') || activeIngredient.includes('acetaminophen')) {
@@ -149,7 +217,7 @@ export function predictMedicationRiskAndEffects(track: MedicationTrack, profile?
 
     if (currentDayNum >= 6) {
       durationWarnings.push('⚠️ High Liver Strain: Continuous daily Paracetamol use for >5 days requires doctor review to prevent hepatic stress.');
-      overallRiskLevel = 'high';
+      if (overallRiskLevel !== 'critical') overallRiskLevel = 'high';
     }
   }
   else {
@@ -157,11 +225,12 @@ export function predictMedicationRiskAndEffects(track: MedicationTrack, profile?
     activeSideEffects.push('Consult prescription leaflet for complete side effect profile');
   }
 
-  // 2. Check Allergy Conflict
-  if (profile?.allergies) {
+  // 3. Check Allergy Conflict
+  if (profile?.allergies && profile.allergies.length > 0) {
     profile.allergies.forEach(allergy => {
-      if (activeIngredient.includes(allergy.toLowerCase()) || track.brand.toLowerCase().includes(allergy.toLowerCase())) {
-        durationWarnings.push(`🚨 CRITICAL ALLERGY CONFLICT: You listed "${allergy}" in your allergy profile! Stop taking immediately.`);
+      const alg = allergy.toLowerCase().trim();
+      if (alg && (activeIngredient.includes(alg) || (track.brand || '').toLowerCase().includes(alg))) {
+        durationWarnings.push(`🚨 ALLERGY CONFLICT WARNING: You are listed as allergic to "${allergy}". STOP medication immediately.`);
         overallRiskLevel = 'critical';
       }
     });
@@ -173,23 +242,26 @@ export function predictMedicationRiskAndEffects(track: MedicationTrack, profile?
     activeSideEffects,
     durationWarnings,
     overallRiskLevel,
+    expiryInfo,
   };
 }
 
-/* ── Supabase Cloud Storage Helpers for Patient Tracks ── */
+/* ── Fetch & Save Cloud Patient Data ── */
 export async function fetchUserPatientData(userId: string): Promise<{ profile: UserProfile; tracks: MedicationTrack[] } | null> {
   try {
-    const { data, error } = await supabase
-      .from('user_patient_records')
+    const { data } = await supabase
+      .from('health_profiles')
       .select('profile, tracks')
       .eq('user_id', userId)
-      .maybeSingle();
+      .single();
 
-    if (error || !data) return null;
-    return {
-      profile: data.profile as UserProfile,
-      tracks: data.tracks as MedicationTrack[],
-    };
+    if (data) {
+      return {
+        profile: data.profile as UserProfile,
+        tracks: (data.tracks as MedicationTrack[]) ?? [],
+      };
+    }
+    return null;
   } catch {
     return null;
   }
@@ -198,7 +270,7 @@ export async function fetchUserPatientData(userId: string): Promise<{ profile: U
 export async function saveUserPatientData(userId: string, profile: UserProfile, tracks: MedicationTrack[]): Promise<boolean> {
   try {
     const { error } = await supabase
-      .from('user_patient_records')
+      .from('health_profiles')
       .upsert({
         user_id: userId,
         profile,

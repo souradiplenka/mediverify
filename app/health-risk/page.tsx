@@ -6,7 +6,7 @@ import {
   HeartPulse, User, Calendar as CalendarIcon, CheckCircle2, Clock, CheckSquare,
   AlertTriangle, AlertOctagon, Sparkles, Plus, Trash2, Check, RefreshCw,
   Stethoscope, Activity, Pill, Info, ArrowRight, ShieldCheck, ShieldAlert, RotateCcw, Cloud, CloudOff, LogIn,
-  AlertCircle, Calendar
+  AlertCircle, Calendar, Lock
 } from 'lucide-react';
 import {
   UserProfile, MedicationTrack, SAMPLE_PATIENT_PROFILE, SAMPLE_MEDICATION_TRACKS,
@@ -250,7 +250,58 @@ export default function HealthRiskDashboard() {
     );
   }
 
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0];
+  // ── ACCESS GATE: SIGN IN REQUIRED TO VIEW HEALTH RISK DASHBOARD ──
+  if (!user) {
+    return (
+      <div className="min-h-[85vh] flex items-center justify-center px-4 bg-slate-50/80 py-12">
+        <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-gray-100 max-w-md w-full text-center space-y-6">
+          
+          <div className="w-16 h-16 bg-emerald-100 text-emerald-800 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
+            <Lock className="w-8 h-8 text-emerald-700" />
+          </div>
+
+          <div>
+            <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3.5 py-1 rounded-full text-xs font-bold border border-emerald-200 mb-3">
+              <HeartPulse className="w-3.5 h-3.5 text-emerald-600" /> Sign In Required
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Access Your Health Profile
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-2 leading-relaxed">
+              To protect your personal health profile, daily medication treatment calendar, batch expiry alerts, and risk predictions, please sign in or create an account first.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={() => setAuthModalOpen(true)}
+              className="btn-primary w-full justify-center py-3.5 text-sm font-bold shadow-lg shadow-emerald-500/20"
+            >
+              <LogIn className="w-4 h-4" /> Sign In / Create Account
+            </button>
+            <Link
+              href="/"
+              className="btn-secondary w-full justify-center py-3 text-xs font-semibold text-gray-600"
+            >
+              Back to Home Page
+            </Link>
+          </div>
+
+          <div className="pt-4 border-t border-gray-100 flex items-center justify-center gap-4 text-[11px] text-gray-400 font-medium">
+            <span>🛡️ End-to-End Private</span>
+            <span>•</span>
+            <span>☁️ Cloud Synced</span>
+          </div>
+
+        </div>
+
+        {/* Auth Modal */}
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      </div>
+    );
+  }
+
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || profile.name;
 
   return (
     <div className="min-h-screen bg-slate-50/70 pb-20">

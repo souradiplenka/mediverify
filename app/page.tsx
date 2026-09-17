@@ -66,69 +66,65 @@ export default function HomePage() {
     <div className="bg-white">
 
       {/* ════ SECTION 1 — HERO ════ */}
-      <section className="relative min-h-screen bg-emerald-900 overflow-hidden flex flex-col">
-        {/* Background texture */}
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #10b981 0%, transparent 50%), radial-gradient(circle at 80% 20%, #065f46 0%, transparent 50%), radial-gradient(circle at 50% 80%, #064e3b 0%, transparent 50%)' }} />
-        <div className="noise-overlay absolute inset-0 opacity-[0.4] mix-blend-overlay pointer-events-none" />
+      <section className="relative min-h-[92vh] bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 overflow-hidden flex flex-col justify-center">
+        {/* BloomSense Ambient Shader Glow */}
+        <div className="absolute inset-0 opacity-40 pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(circle at 50% 35%, rgba(16,185,129,0.22) 0%, rgba(6,78,59,0.1) 50%, transparent 75%), radial-gradient(circle at 80% 20%, rgba(52,211,153,0.15) 0%, transparent 40%)' }} />
+        <div className="noise-overlay absolute inset-0 opacity-[0.35] mix-blend-overlay pointer-events-none" />
 
         {/* Content */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 py-24">
-          {/* Badge */}
-          <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-            className="mb-8 inline-flex items-center gap-2 px-5 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-sm text-emerald-100 font-medium">
-            <Shield className="w-3.5 h-3.5 text-emerald-300" />
-            Fake Medicine Detection System — Powered by OpenFDA
-          </motion.div>
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 py-20">
+          
+          {/* Badge — Shader Fade-in Down */}
+          <div className="shader-fade-in-down mb-6 inline-flex items-center gap-2 px-5 py-2 bg-white/10 backdrop-blur-md border border-emerald-400/30 rounded-full text-xs md:text-sm text-emerald-200 font-semibold shadow-lg shadow-emerald-950/40">
+            <Shield className="w-4 h-4 text-emerald-400 animate-pulse" />
+            Fake Medicine Detection System — Powered by OpenFDA & WHO
+          </div>
 
-          {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight max-w-4xl mb-6"
+          {/* Headline — Shader Fade-in Up (Delay 200) */}
+          <h1
+            className="shader-fade-in-up shader-delay-200 text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight max-w-4xl mb-6 tracking-tight"
             style={{ fontFamily: 'Playfair Display, serif' }}>
             Decode Medicine
-            <span className="block italic text-emerald-300"> Authenticity</span>
+            <span className="block italic text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400"> Authenticity</span>
             with Precision
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-emerald-100/80 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed font-light">
+          {/* Paragraph — Shader Fade-in Up (Delay 400) */}
+          <p className="shader-fade-in-up shader-delay-400 text-emerald-100/85 text-base md:text-lg lg:text-xl max-w-2xl mb-10 leading-relaxed font-light">
             Instantly verify if your medicine is genuine. Detect counterfeits, report fake drugs, and protect lives across India — backed by global FDA data.
-          </motion.p>
+          </p>
 
-          {/* Search bar */}
-          <motion.form onSubmit={handleSearch}
-            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
-            className="w-full max-w-xl flex gap-2 mb-8">
+          {/* Search bar — Shader Fade-in Up (Delay 600) */}
+          <form onSubmit={handleSearch}
+            className="shader-fade-in-up shader-delay-600 w-full max-w-xl flex flex-col sm:flex-row gap-2.5 mb-8">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input type="text" placeholder="e.g. Dolo 650, Peptard 20, Augmentin, Pan 40…"
                 value={query} onChange={e => setQuery(e.target.value)}
-                className="w-full pl-11 pr-4 py-3.5 rounded-full bg-white text-gray-800 placeholder:text-gray-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-lg" />
+                className="w-full pl-11 pr-4 py-3.5 rounded-full bg-white text-gray-800 placeholder:text-gray-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-xl" />
             </div>
-            <button type="submit" className="px-6 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold rounded-full text-sm transition-all shadow-lg hover:shadow-xl hover:scale-105">
-              Verify
+            <button type="submit" className="px-7 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-full text-sm transition-all shadow-lg hover:shadow-emerald-500/30 hover:scale-105 shrink-0">
+              Verify Now
             </button>
-          </motion.form>
+          </form>
 
-          {/* CTA buttons */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-            className="flex flex-wrap gap-3 justify-center">
-            <Link href="/verify" className="flex items-center gap-2 px-6 py-3 bg-white text-emerald-800 font-semibold rounded-full text-sm hover:bg-emerald-50 transition-all shadow-md hover:shadow-lg">
-              <QrCode className="w-4 h-4" /> Scan QR Code
+          {/* CTA buttons — Shader Fade-in Up (Delay 800) */}
+          <div className="shader-fade-in-up shader-delay-800 flex flex-wrap gap-3 justify-center">
+            <Link href="/verify" className="flex items-center gap-2 px-6 py-3 bg-white text-emerald-900 font-bold rounded-full text-sm hover:bg-emerald-50 transition-all shadow-md hover:shadow-lg">
+              <QrCode className="w-4 h-4 text-emerald-700" /> Scan QR Code
             </Link>
-            <Link href="/report" className="flex items-center gap-2 px-6 py-3 bg-white/10 border border-white/25 text-white font-semibold rounded-full text-sm hover:bg-white/20 transition-all backdrop-blur-sm">
-              <AlertTriangle className="w-4 h-4" /> Report Fake Medicine
+            <Link href="/report" className="flex items-center gap-2 px-6 py-3 bg-emerald-900/80 border border-emerald-400/40 text-emerald-100 font-semibold rounded-full text-sm hover:bg-emerald-800 transition-all backdrop-blur-md">
+              <AlertTriangle className="w-4 h-4 text-red-400" /> Report Fake Medicine
             </Link>
-          </motion.div>
+          </div>
         </div>
 
         {/* Bottom scroll hint */}
-        <div className="relative z-10 pb-8 flex justify-center">
+        <div className="relative z-10 pb-6 flex justify-center">
           <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 2 }}
-            className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
-            <div className="w-1 h-3 bg-white/50 rounded-full" />
+            className="w-6 h-10 border-2 border-emerald-400/30 rounded-full flex justify-center pt-2">
+            <div className="w-1 h-3 bg-emerald-400/60 rounded-full" />
           </motion.div>
         </div>
       </section>

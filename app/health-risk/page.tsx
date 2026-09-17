@@ -50,12 +50,27 @@ export default function HealthRiskDashboard() {
       setUser(currentUser);
 
       if (currentUser) {
+        const uName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Patient';
         const cloudData = await fetchUserPatientData(currentUser.id);
         if (cloudData) {
-          setProfile(cloudData.profile);
+          const updatedProf = {
+            ...cloudData.profile,
+            name: (!cloudData.profile.name || cloudData.profile.name === 'Guest Patient' || cloudData.profile.name === 'Patient')
+              ? uName
+              : cloudData.profile.name
+          };
+          setProfile(updatedProf);
           setTracks(cloudData.tracks);
+          if (updatedProf.name !== cloudData.profile.name) {
+            await saveUserPatientData(currentUser.id, updatedProf, cloudData.tracks);
+          }
         } else {
-          loadLocalData();
+          const newProf: UserProfile = {
+            ...SAMPLE_PATIENT_PROFILE,
+            name: uName,
+          };
+          setProfile(newProf);
+          await saveUserPatientData(currentUser.id, newProf, SAMPLE_MEDICATION_TRACKS);
         }
       } else {
         loadLocalData();
@@ -79,12 +94,24 @@ export default function HealthRiskDashboard() {
       setUser(currentUser);
       if (currentUser) {
         setSyncing(true);
+        const uName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Patient';
         const cloudData = await fetchUserPatientData(currentUser.id);
         if (cloudData) {
-          setProfile(cloudData.profile);
+          const updatedProf = {
+            ...cloudData.profile,
+            name: (!cloudData.profile.name || cloudData.profile.name === 'Guest Patient' || cloudData.profile.name === 'Patient')
+              ? uName
+              : cloudData.profile.name
+          };
+          setProfile(updatedProf);
           setTracks(cloudData.tracks);
         } else {
-          await saveUserPatientData(currentUser.id, profile, tracks);
+          const newProf: UserProfile = {
+            ...profile,
+            name: uName !== 'Patient' ? uName : (profile.name || 'Patient'),
+          };
+          setProfile(newProf);
+          await saveUserPatientData(currentUser.id, newProf, tracks);
         }
         setSyncing(false);
       }
@@ -107,6 +134,10 @@ export default function HealthRiskDashboard() {
     if (user) {
       setSyncing(true);
       await saveUserPatientData(user.id, newProfile, newTracks);
+      // Also sync user metadata full_name if updated
+      if (newProfile.name && newProfile.name !== user.user_metadata?.full_name) {
+        await supabase.auth.updateUser({ data: { full_name: newProfile.name } });
+      }
       setSyncing(false);
     }
   };
@@ -115,7 +146,7 @@ export default function HealthRiskDashboard() {
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     const updated: UserProfile = {
-      name: editName.trim() || 'Patient',
+      name: editName.trim() || (user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Patient'),
       age: Number(editAge) || 26,
       gender: editGender,
       allergies: editAllergies.split(',').map(s => s.trim()).filter(Boolean),
@@ -126,7 +157,8 @@ export default function HealthRiskDashboard() {
   };
 
   const openProfileModal = () => {
-    setEditName(profile.name);
+    const uName = user?.user_metadata?.full_name || user?.email?.split('@')[0];
+    setEditName(profile.name === 'Guest Patient' && uName ? uName : profile.name);
     setEditAge(profile.age || 26);
     setEditGender(profile.gender || 'Male');
     setEditAllergies((profile.allergies || []).join(', '));

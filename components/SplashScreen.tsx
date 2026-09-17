@@ -3,226 +3,115 @@
 import { useState, useEffect } from 'react';
 
 export default function SplashScreen({ onDone }: { onDone: () => void }) {
-  const [counter, setCounter] = useState(0);
-  const [contentVisible, setContentVisible] = useState(true);
-  const [overlayOpacity, setOverlayOpacity] = useState(1);
+  const [progress, setProgress] = useState(0);
+  const [isFinished, setIsFinished] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
-    const totalMs = 2400;
-    const interval = totalMs / 100;
-    let current = 0;
+    const duration = 2000; // 2 seconds to reach 100%
+    const intervalTime = 20;
+    const steps = duration / intervalTime;
+    let currentStep = 0;
 
     const timer = setInterval(() => {
-      current += 1;
-      setCounter(current);
-      if (current >= 100) {
+      currentStep++;
+      const currentProgress = Math.min(Math.round((currentStep / steps) * 100), 100);
+      setProgress(currentProgress);
+
+      if (currentProgress >= 100) {
         clearInterval(timer);
+        setIsFinished(true);
 
-        // Step 1: fade out content (logo, text, bar) quickly
-        setTimeout(() => setContentVisible(false), 200);
+        // Hold briefly at 100% then start exit animation
+        setTimeout(() => {
+          setIsExiting(true);
+        }, 200);
 
-        // Step 2: after content fades, fade the dark overlay itself to 0
-        // This reveals the website smoothly underneath
-        setTimeout(() => setOverlayOpacity(0), 500);
-
-        // Step 3: unmount
-        setTimeout(() => onDone(), 1300);
+        // Remove splash from DOM after exit animation completes
+        setTimeout(() => {
+          onDone();
+        }, 900);
       }
-    }, interval);
+    }, intervalTime);
 
     return () => clearInterval(timer);
   }, [onDone]);
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
-        background: '#050505',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: overlayOpacity,
-        transition: overlayOpacity < 1
-          ? 'opacity 0.8s cubic-bezier(0.76, 0, 0.24, 1)'
-          : 'none',
-        pointerEvents: overlayOpacity === 0 ? 'none' : 'all',
-      }}
+      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#022c22] text-white transition-all duration-700 ease-in-out ${
+        isExiting ? 'opacity-0 scale-105 blur-sm pointer-events-none' : 'opacity-100 scale-100 blur-none'
+      }`}
     >
-      {/* Grain texture */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          opacity: 0.035,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '200px 200px',
-          pointerEvents: 'none',
-        }}
-      />
+      {/* Background ambient lighting */}
+      <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
+      <div className="absolute w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+      <div className="absolute w-[300px] h-[300px] bg-teal-400/10 rounded-full blur-2xl top-1/4 right-1/4 pointer-events-none" />
 
-      {/* Faint green core glow */}
-      <div
-        style={{
-          position: 'absolute',
-          width: 500,
-          height: 500,
-          background: 'radial-gradient(circle, rgba(16,185,129,0.055) 0%, transparent 68%)',
-          borderRadius: '50%',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Centre content — fades out first */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          userSelect: 'none',
-          opacity: contentVisible ? 1 : 0,
-          transform: contentVisible ? 'scale(1) translateY(0)' : 'scale(1.04) translateY(-6px)',
-          transition: 'opacity 0.4s cubic-bezier(0.76, 0, 0.24, 1), transform 0.4s cubic-bezier(0.76, 0, 0.24, 1)',
-        }}
-      >
-        {/* Icon */}
-        <div style={{ marginBottom: 28 }}>
-          <div
-            style={{
-              width: 68,
-              height: 68,
-              borderRadius: 18,
-              background: 'linear-gradient(135deg, #064e3b 0%, #10b981 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 36px rgba(16,185,129,0.22)',
-            }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" style={{ width: 34, height: 34 }}>
+      {/* Center content */}
+      <div className="relative z-10 flex flex-col items-center text-center px-6 select-none max-w-md w-full">
+        
+        {/* Animated Shield Logo */}
+        <div className="relative mb-8">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 flex items-center justify-center shadow-2xl shadow-emerald-500/30 border border-emerald-300/30">
+            <svg viewBox="0 0 24 24" fill="none" className="w-10 h-10 sm:w-12 sm:h-12 text-white">
               <path
                 d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z"
-                fill="white"
-                fillOpacity="0.95"
+                fill="currentColor"
+                fillOpacity="0.9"
               />
               <path
                 d="M9 12l2 2 4-4"
                 stroke="#064e3b"
-                strokeWidth="2.2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
           </div>
+          <div className="absolute -inset-2 rounded-3xl border border-emerald-400/30 animate-ping opacity-40 pointer-events-none" />
         </div>
 
-        {/* Brand */}
+        {/* Title */}
         <h1
-          style={{
-            fontFamily: 'Playfair Display, Georgia, serif',
-            fontSize: '2.5rem',
-            fontWeight: 700,
-            color: '#ffffff',
-            letterSpacing: '-0.02em',
-            lineHeight: 1,
-            margin: 0,
-          }}
+          className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight mb-2"
+          style={{ fontFamily: 'Playfair Display, serif' }}
         >
-          Medi<span style={{ color: '#10b981' }}>Verify</span>
+          Medi<span className="text-emerald-400">Verify</span>
         </h1>
 
-        {/* Tagline */}
-        <p
-          style={{
-            fontFamily: 'Inter, sans-serif',
-            fontSize: '0.65rem',
-            fontWeight: 500,
-            color: 'rgba(255,255,255,0.22)',
-            letterSpacing: '0.3em',
-            textTransform: 'uppercase',
-            marginTop: 10,
-          }}
-        >
-          Healthcare Protection
+        {/* Subtitle */}
+        <p className="text-emerald-200/70 text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase mb-10">
+          Fake Medicine Detection System
         </p>
 
-        {/* Progress bar */}
-        <div
-          style={{
-            marginTop: 48,
-            width: 150,
-            height: 1,
-            background: 'rgba(255,255,255,0.07)',
-            borderRadius: 999,
-            overflow: 'hidden',
-          }}
-        >
+        {/* Progress Bar Container */}
+        <div className="w-full bg-emerald-950/60 border border-emerald-700/50 rounded-full h-3 p-0.5 overflow-hidden shadow-inner mb-3">
           <div
-            style={{
-              height: '100%',
-              width: `${counter}%`,
-              background: 'linear-gradient(90deg, #10b981, #34d399)',
-              borderRadius: 999,
-              boxShadow: '0 0 8px rgba(16,185,129,0.7)',
-              transition: 'width 0.04s linear',
-            }}
+            className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-300 rounded-full transition-all duration-75 ease-out shadow-md shadow-emerald-400/50"
+            style={{ width: `${progress}%` }}
           />
         </div>
 
-        {/* Counter */}
-        <p
-          style={{
-            fontFamily: 'Inter, monospace',
-            fontSize: '0.6rem',
-            fontWeight: 400,
-            color: 'rgba(255,255,255,0.15)',
-            letterSpacing: '0.12em',
-            marginTop: 12,
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
-          {String(counter).padStart(2, '0')} / 100
-        </p>
+        {/* Percentage Counter */}
+        <div className="flex items-center justify-between w-full text-xs font-mono font-bold text-emerald-300/90 px-1">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            Loading System Data…
+          </span>
+          <span className="text-sm text-emerald-300 font-extrabold">{progress}%</span>
+        </div>
+
       </div>
 
-      {/* Bottom corners */}
-      <span
-        style={{
-          position: 'absolute',
-          bottom: 24,
-          left: 28,
-          fontFamily: 'Inter, sans-serif',
-          fontSize: '0.58rem',
-          color: 'rgba(255,255,255,0.1)',
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          opacity: contentVisible ? 1 : 0,
-          transition: 'opacity 0.3s ease',
-        }}
-      >
-        v1.0
-      </span>
-      <span
-        style={{
-          position: 'absolute',
-          bottom: 24,
-          right: 28,
-          fontFamily: 'Inter, sans-serif',
-          fontSize: '0.58rem',
-          color: 'rgba(255,255,255,0.1)',
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          opacity: contentVisible ? 1 : 0,
-          transition: 'opacity 0.3s ease',
-        }}
-      >
-        Protecting Lives
-      </span>
+      {/* Footer Badges */}
+      <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-6 text-[11px] font-medium text-emerald-300/50 uppercase tracking-widest">
+        <span>WHO Standards</span>
+        <span>•</span>
+        <span>CDSCO Registered</span>
+        <span>•</span>
+        <span>OpenFDA AI</span>
+      </div>
     </div>
   );
 }

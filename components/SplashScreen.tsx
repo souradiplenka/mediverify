@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 export default function SplashScreen({ onDone }: { onDone: () => void }) {
   const [progress, setProgress] = useState(0);
@@ -39,7 +40,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
 
   return (
     <div
-      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#022c22] text-white transition-all duration-700 ease-in-out ${
+      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#022c22] text-white transition-all duration-700 ease-in-out overflow-hidden ${
         isExiting ? 'opacity-0 scale-105 blur-sm pointer-events-none' : 'opacity-100 scale-100 blur-none'
       }`}
     >
@@ -47,6 +48,28 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
       <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
       <div className="absolute w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
       <div className="absolute w-[300px] h-[300px] bg-teal-400/10 rounded-full blur-2xl top-1/4 right-1/4 pointer-events-none" />
+
+      {/* ── TO AND FRO MOVING BACKGROUND LINES (BLOOMSENSE STYLE) ── */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Line 1: Moving left to right and back */}
+        <motion.div
+          animate={{ x: ['-80%', '180%', '-80%'] }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-1/3 h-[2px] w-[70%] bg-gradient-to-r from-transparent via-emerald-400 to-transparent blur-[1px] shadow-[0_0_20px_#10b981]"
+        />
+        {/* Line 2: Moving right to left and back */}
+        <motion.div
+          animate={{ x: ['180%', '-80%', '180%'] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-2/3 h-[1.5px] w-[60%] bg-gradient-to-r from-transparent via-teal-300 to-transparent blur-[1px] shadow-[0_0_18px_#34d399]"
+        />
+        {/* Line 3: Subtle center pulse laser */}
+        <motion.div
+          animate={{ opacity: [0.2, 0.8, 0.2], width: ['40%', '80%', '40%'] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[1px] bg-gradient-to-r from-transparent via-emerald-300 to-transparent shadow-[0_0_15px_#10b981]"
+        />
+      </div>
 
       {/* Center content */}
       <div className="relative z-10 flex flex-col items-center text-center px-6 select-none max-w-md w-full">

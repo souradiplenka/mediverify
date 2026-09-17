@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: '/hospitals',  label: 'Nearby Hospitals' },
   { href: '/medicines',  label: 'Medicine Database' },
   { href: '/dashboard',  label: 'Dashboard' },
+  { href: '/admin',      label: 'Admin Portal' },
 ];
 
 export default function Navbar() {

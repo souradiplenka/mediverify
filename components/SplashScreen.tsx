@@ -40,13 +40,13 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
 
   return (
     <div
-      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#022c22] text-white transition-all duration-700 ease-in-out overflow-hidden ${
+      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-gradient-to-br from-[#092C28] via-[#0F766E] to-[#092C28] text-white transition-all duration-700 ease-in-out overflow-hidden ${
         isExiting ? 'opacity-0 scale-105 blur-sm pointer-events-none' : 'opacity-100 scale-100 blur-none'
       }`}
     >
       {/* Background ambient lighting */}
-      <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
-      <div className="absolute w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+      <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#0D9488_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
+      <div className="absolute w-[500px] h-[500px] bg-teal-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
       <div className="absolute w-[300px] h-[300px] bg-teal-400/10 rounded-full blur-2xl top-1/4 right-1/4 pointer-events-none" />
 
       {/* ── TO AND FRO MOVING BACKGROUND LINES (BLOOMSENSE STYLE) ── */}
@@ -55,19 +55,19 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
         <motion.div
           animate={{ x: ['-80%', '180%', '-80%'] }}
           transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-1/3 h-[2px] w-[70%] bg-gradient-to-r from-transparent via-emerald-400 to-transparent blur-[1px] shadow-[0_0_20px_#10b981]"
+          className="absolute top-1/3 h-[2px] w-[70%] bg-gradient-to-r from-transparent via-teal-400 to-transparent blur-[1px] shadow-[0_0_20px_#0D9488]"
         />
         {/* Line 2: Moving right to left and back */}
         <motion.div
           animate={{ x: ['180%', '-80%', '180%'] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-2/3 h-[1.5px] w-[60%] bg-gradient-to-r from-transparent via-teal-300 to-transparent blur-[1px] shadow-[0_0_18px_#34d399]"
+          className="absolute top-2/3 h-[1.5px] w-[60%] bg-gradient-to-r from-transparent via-teal-300 to-transparent blur-[1px] shadow-[0_0_18px_#14B8A6]"
         />
         {/* Line 3: Subtle center pulse laser */}
         <motion.div
           animate={{ opacity: [0.2, 0.8, 0.2], width: ['40%', '80%', '40%'] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[1px] bg-gradient-to-r from-transparent via-emerald-300 to-transparent shadow-[0_0_15px_#10b981]"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[1px] bg-gradient-to-r from-transparent via-teal-300 to-transparent shadow-[0_0_15px_#0D9488]"
         />
       </div>
 
@@ -76,7 +76,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
         
         {/* Animated Shield Logo */}
         <div className="relative mb-8">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 flex items-center justify-center shadow-2xl shadow-emerald-500/30 border border-emerald-300/30">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-[#0F766E] via-[#0D9488] to-[#2DD4BF] flex items-center justify-center shadow-2xl shadow-teal-500/30 border border-teal-300/30">
             <svg viewBox="0 0 24 24" fill="none" className="w-10 h-10 sm:w-12 sm:h-12 text-white">
               <path
                 d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z"
@@ -85,14 +85,14 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
               />
               <path
                 d="M9 12l2 2 4-4"
-                stroke="#064e3b"
+                stroke="#0F766E"
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
           </div>
-          <div className="absolute -inset-2 rounded-3xl border border-emerald-400/30 animate-ping opacity-40 pointer-events-none" />
+          <div className="absolute -inset-2 rounded-3xl border border-teal-400/30 animate-ping opacity-40 pointer-events-none" />
         </div>
 
         {/* Title */}

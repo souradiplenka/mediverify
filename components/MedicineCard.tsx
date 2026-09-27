@@ -10,7 +10,7 @@ interface MedicineCardProps {
 }
 
 const borderColor: Record<string, string> = {
-  verified:   'border-l-emerald-500',
+  verified:   'border-l-blue-600',
   suspicious: 'border-l-red-500',
   recalled:   'border-l-orange-500',
   unknown:    'border-l-gray-300',
@@ -226,20 +226,20 @@ export default function MedicineCard({ medicine, expanded = false }: MedicineCar
       </div>
 
       {/* ── WHY THIS MEDICINE IS TAKEN ── */}
-      <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
+      <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
         <div className="flex items-center gap-1.5 mb-2">
-          <Stethoscope className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">Why This Medicine is Taken</span>
+          <Stethoscope className="w-4 h-4 text-blue-600 shrink-0" />
+          <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Why This Medicine is Taken</span>
         </div>
         <div className="flex flex-wrap gap-1.5 mb-2">
           {drugInfo.uses.map((use, i) => (
-            <span key={i} className="inline-block bg-emerald-100 text-emerald-800 text-xs font-medium px-2.5 py-1 rounded-full">
+            <span key={i} className="inline-block bg-blue-100/80 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full">
               {use}
             </span>
           ))}
         </div>
         {drugInfo.howItWorks && (
-          <p className="text-xs text-emerald-700 mt-2 leading-relaxed">
+          <p className="text-xs text-blue-700 mt-2 leading-relaxed">
             <span className="font-semibold">How it works: </span>{drugInfo.howItWorks}
           </p>
         )}
@@ -328,8 +328,8 @@ export default function MedicineCard({ medicine, expanded = false }: MedicineCar
           onClick={handleAddToCabinet}
           className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${
             added
-              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-              : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-100'
+              ? 'bg-blue-100 text-blue-800 border border-blue-300'
+              : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-100'
           }`}
         >
           {added ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
@@ -337,7 +337,7 @@ export default function MedicineCard({ medicine, expanded = false }: MedicineCar
         </button>
 
         <Link href={`/medicines/${medicine.id}`}
-          className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-emerald-800 transition-colors group">
+          className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-blue-600 transition-colors group">
           Details
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
         </Link>

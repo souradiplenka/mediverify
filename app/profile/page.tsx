@@ -118,19 +118,19 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-slate-50/70 pb-20">
       
       {/* ── Top Header ── */}
-      <section className="bg-emerald-950 text-white pt-10 pb-16 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]" />
+      <section className="bg-[#0F172A] text-white pt-10 pb-16 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#2563EB_1px,transparent_1px)] [background-size:16px_16px]" />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="inline-flex items-center gap-1.5 bg-emerald-900/80 border border-emerald-700/60 px-3 py-1 rounded-full text-xs font-semibold text-emerald-300">
-                  <User className="w-3.5 h-3.5 text-emerald-400" /> Patient Medical Profile
+                <span className="inline-flex items-center gap-1.5 bg-blue-900/80 border border-blue-700/60 px-3 py-1 rounded-full text-xs font-semibold text-blue-300">
+                  <User className="w-3.5 h-3.5 text-blue-400" /> Patient Medical Profile
                 </span>
                 {user ? (
-                  <span className="inline-flex items-center gap-1.5 bg-emerald-800/90 border border-emerald-600/80 px-3 py-1 rounded-full text-xs font-semibold text-emerald-100">
-                    <Cloud className="w-3 h-3 text-emerald-400" /> Account Synced
+                  <span className="inline-flex items-center gap-1.5 bg-blue-800/90 border border-blue-600/80 px-3 py-1 rounded-full text-xs font-semibold text-blue-100">
+                    <Cloud className="w-3 h-3 text-blue-400" /> Account Synced
                   </span>
                 ) : (
                   <button
@@ -145,7 +145,7 @@ export default function ProfilePage() {
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                 My Health Profile
               </h1>
-              <p className="text-emerald-200/80 text-sm mt-2 max-w-xl leading-relaxed">
+              <p className="text-blue-200/80 text-sm mt-2 max-w-xl leading-relaxed">
                 Manage your personal details, emergency contacts, medical history, and drug allergy records.
               </p>
             </div>
@@ -154,16 +154,16 @@ export default function ProfilePage() {
             <div className="flex flex-wrap gap-2 shrink-0">
               <button
                 onClick={() => setIsEditing(!isEditing)}
-                className="bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-sm px-5 py-2.5 rounded-full transition-all shadow-lg flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-5 py-2.5 rounded-full transition-all shadow-lg flex items-center gap-2"
               >
                 {isEditing ? <Save className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
                 {isEditing ? 'Save Changes' : 'Edit Profile'}
               </button>
               <Link
                 href="/health-risk"
-                className="bg-white/10 hover:bg-white/20 text-emerald-100 text-sm font-medium px-5 py-2.5 rounded-full transition-all flex items-center gap-2 border border-white/10"
+                className="bg-white/10 hover:bg-white/20 text-blue-100 text-sm font-medium px-5 py-2.5 rounded-full transition-all flex items-center gap-2 border border-white/10"
               >
-                <HeartPulse className="w-4 h-4 text-emerald-400" /> Risk Dashboard
+                <HeartPulse className="w-4 h-4 text-blue-400" /> Risk Dashboard
               </Link>
             </div>
           </div>
@@ -175,8 +175,8 @@ export default function ProfilePage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20 space-y-6">
         
         {savedSuccess && (
-          <div className="bg-emerald-100 border border-emerald-300 text-emerald-900 p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold shadow-sm animate-in fade-in">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="bg-blue-100 border border-blue-300 text-blue-900 p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold shadow-sm animate-in fade-in">
+            <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
             <span>Profile details saved successfully! Your preferences are active across MediVerify.</span>
           </div>
         )}
@@ -185,7 +185,7 @@ export default function ProfilePage() {
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center shadow-inner">
+              <div className="w-12 h-12 bg-blue-100 text-blue-800 rounded-2xl flex items-center justify-center shadow-inner">
                 <User className="w-6 h-6" />
               </div>
               <div>
@@ -385,12 +385,12 @@ export default function ProfilePage() {
               <div>
                 <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Primary Physician</span>
                 <p className="font-bold text-gray-900 text-base mt-0.5">{profile.primaryDoctor}</p>
-                <p className="text-xs text-emerald-700 font-medium mt-1">{profile.doctorPhone}</p>
+                <p className="text-xs text-blue-700 font-medium mt-1">{profile.doctorPhone}</p>
               </div>
               <div>
                 <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Emergency Contact</span>
                 <p className="font-bold text-gray-900 text-base mt-0.5">{profile.emergencyContact}</p>
-                <p className="text-xs text-emerald-700 font-medium mt-1">{profile.emergencyPhone}</p>
+                <p className="text-xs text-blue-700 font-medium mt-1">{profile.emergencyPhone}</p>
               </div>
             </div>
           ) : (

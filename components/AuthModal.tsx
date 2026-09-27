@@ -85,10 +85,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
 
         {/* Modal Header */}
         <div className="text-center mb-6">
-          <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+          <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
             {mode === 'signin' ? <LogIn className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
           </div>
-          <h2 className="text-2xl font-bold text-emerald-950" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h2 className="text-2xl font-bold text-[#0F172A]" style={{ fontFamily: 'Playfair Display, serif' }}>
             {mode === 'signin' ? 'Sign In to MediVerify' : 'Create Personal Account'}
           </h2>
           <p className="text-xs text-gray-500 mt-1">
@@ -104,7 +104,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
             type="button"
             onClick={() => { setMode('signin'); setError(''); setMessage(''); }}
             className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-              mode === 'signin' ? 'bg-white shadow text-emerald-900' : 'text-gray-500 hover:text-gray-800'
+              mode === 'signin' ? 'bg-white shadow text-blue-900' : 'text-gray-500 hover:text-gray-800'
             }`}
           >
             Sign In
@@ -113,7 +113,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
             type="button"
             onClick={() => { setMode('signup'); setError(''); setMessage(''); }}
             className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-              mode === 'signup' ? 'bg-white shadow text-emerald-900' : 'text-gray-500 hover:text-gray-800'
+              mode === 'signup' ? 'bg-white shadow text-blue-900' : 'text-gray-500 hover:text-gray-800'
             }`}
           >
             Create Account
@@ -129,8 +129,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
         )}
 
         {message && (
-          <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-800 text-xs rounded-xl flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-green-600" />
             <span>{message}</span>
           </div>
         )}

@@ -291,7 +291,7 @@ export default function AdminPage() {
   const reportBadge: Record<string, string> = {
     submitted: 'bg-blue-100 text-blue-700',
     under_review: 'bg-amber-100 text-amber-700',
-    action_taken: 'bg-emerald-100 text-emerald-700',
+    action_taken: 'bg-green-100 text-green-700',
     dismissed: 'bg-gray-100 text-gray-600',
   };
 
@@ -301,8 +301,8 @@ export default function AdminPage() {
       <div className="min-h-[80vh] flex items-center justify-center px-4 bg-slate-50">
         <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 max-w-sm w-full text-center">
           <div className="flex justify-center mb-4">
-            <div className="bg-emerald-100 p-4 rounded-2xl">
-              <Lock className="w-8 h-8 text-emerald-800" />
+            <div className="bg-blue-100 p-4 rounded-2xl">
+              <Lock className="w-8 h-8 text-blue-800" />
             </div>
           </div>
           <h1 className="text-2xl font-extrabold text-gray-900 mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
@@ -331,19 +331,19 @@ export default function AdminPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-emerald-950 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-emerald-800">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#0F172A] text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-blue-800">
         <div>
-          <div className="inline-flex items-center gap-2 bg-emerald-900/80 border border-emerald-700/60 px-3 py-1 rounded-full text-xs font-semibold text-emerald-300 mb-2">
-            <Shield className="w-3.5 h-3.5 text-emerald-400" /> Administrator Portal
+          <div className="inline-flex items-center gap-2 bg-blue-900/80 border border-blue-700/60 px-3 py-1 rounded-full text-xs font-semibold text-blue-300 mb-2">
+            <Shield className="w-3.5 h-3.5 text-blue-400" /> Administrator Portal
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
             MediVerify Control & Analytics Dashboard
           </h1>
-          <p className="text-emerald-200/80 text-xs sm:text-sm mt-1">
+          <p className="text-blue-200/80 text-xs sm:text-sm mt-1">
             Real-time analytics on users, medicine verifications, safety checks, and fake drug reports.
           </p>
         </div>
-        <button onClick={loadData} className="bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-full border border-emerald-600 transition-all flex items-center gap-2 shrink-0">
+        <button onClick={loadData} className="bg-blue-800 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-full border border-blue-600 transition-all flex items-center gap-2 shrink-0">
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Data
         </button>
       </div>
@@ -369,7 +369,7 @@ export default function AdminPage() {
         <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Medicine Checked</span>
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
               <Activity className="w-5 h-5" />
             </div>
           </div>
@@ -389,7 +389,7 @@ export default function AdminPage() {
           </div>
           <div>
             <h3 className="text-3xl font-black text-gray-900">{stats.verifiedMedicine}</h3>
-            <p className="text-[11px] text-emerald-600 font-semibold mt-1">Safe Verified Drugs in DB</p>
+            <p className="text-[11px] text-blue-600 font-semibold mt-1">Safe Verified Drugs in DB</p>
           </div>
         </div>
 
@@ -437,7 +437,7 @@ export default function AdminPage() {
             onClick={() => setTab(key)}
             className={`flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold transition-all ${
               tab === key
-                ? 'bg-emerald-800 text-white shadow-md'
+                ? 'bg-blue-800 text-white shadow-md'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
             }`}
           >
@@ -448,7 +448,7 @@ export default function AdminPage() {
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
         </div>
       ) : (
         <>
@@ -468,7 +468,7 @@ export default function AdminPage() {
                       </h2>
                       <p className="text-xs text-gray-500">Ratio of verified safe medicines vs suspicious/unverified queries</p>
                     </div>
-                    <span className="text-xs font-extrabold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">
+                    <span className="text-xs font-extrabold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
                       {stats.totalMedicineChecked > 0 ? Math.round((stats.verifiedMedicine / (stats.verifiedMedicine + stats.unverifiedChecks)) * 100) : 100}% Safe
                     </span>
                   </div>
@@ -476,7 +476,7 @@ export default function AdminPage() {
                   {/* Visual Bar */}
                   <div className="w-full bg-slate-100 h-4 rounded-full overflow-hidden flex">
                     <div
-                      className="bg-emerald-500 h-full transition-all duration-500"
+                      className="bg-blue-600 h-full transition-all duration-500"
                       style={{ width: `${stats.totalMedicineChecked > 0 ? Math.max(10, Math.round((stats.verifiedMedicine / (stats.verifiedMedicine + stats.unverifiedChecks)) * 100)) : 80}%` }}
                       title="Verified Medicines"
                     />
@@ -489,7 +489,7 @@ export default function AdminPage() {
 
                   <div className="grid grid-cols-2 gap-4 pt-2 text-xs">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                      <div className="w-3 h-3 rounded-full bg-blue-600" />
                       <span className="font-semibold text-gray-700">Verified Safe Medicines ({stats.verifiedMedicine})</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -500,12 +500,12 @@ export default function AdminPage() {
                 </div>
 
                 {/* Quick Action Shortcuts */}
-                <div className="bg-gradient-to-br from-emerald-900 to-emerald-950 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between space-y-4">
+                <div className="bg-gradient-to-br from-blue-900 to-[#0F172A] text-white rounded-3xl p-6 shadow-md flex flex-col justify-between space-y-4">
                   <div>
                     <h3 className="font-bold text-lg text-white mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
                       Admin Quick Actions
                     </h3>
-                    <p className="text-xs text-emerald-200/80 leading-relaxed">
+                    <p className="text-xs text-blue-200/80 leading-relaxed">
                       Take immediate action on user reports or register new authenticated medicines.
                     </p>
                   </div>
@@ -515,12 +515,12 @@ export default function AdminPage() {
                       onClick={() => setTab('reports')}
                       className="w-full text-left bg-white/10 hover:bg-white/20 border border-white/20 p-3 rounded-2xl transition-all text-xs font-bold flex items-center justify-between"
                     >
-                      <span className="flex items-center gap-2"><ClipboardList className="w-4 h-4 text-emerald-300" /> Review Reports ({reports.length})</span>
-                      <ArrowUpRight className="w-4 h-4 text-emerald-300" />
+                      <span className="flex items-center gap-2"><ClipboardList className="w-4 h-4 text-blue-300" /> Review Reports ({reports.length})</span>
+                      <ArrowUpRight className="w-4 h-4 text-blue-300" />
                     </button>
                     <button
                       onClick={() => setTab('add')}
-                      className="w-full text-left bg-emerald-500 hover:bg-emerald-400 text-white p-3 rounded-2xl transition-all text-xs font-bold flex items-center justify-between shadow-md"
+                      className="w-full text-left bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-2xl transition-all text-xs font-bold flex items-center justify-between shadow-md"
                     >
                       <span className="flex items-center gap-2"><Plus className="w-4 h-4" /> Add Single Medicine</span>
                       <ArrowUpRight className="w-4 h-4" />
@@ -529,8 +529,8 @@ export default function AdminPage() {
                       onClick={() => setTab('bulk')}
                       className="w-full text-left bg-white/10 hover:bg-white/20 border border-white/20 p-3 rounded-2xl transition-all text-xs font-bold flex items-center justify-between"
                     >
-                      <span className="flex items-center gap-2"><Upload className="w-4 h-4 text-emerald-300" /> Bulk CSV Import</span>
-                      <ArrowUpRight className="w-4 h-4 text-emerald-300" />
+                      <span className="flex items-center gap-2"><Upload className="w-4 h-4 text-blue-300" /> Bulk CSV Import</span>
+                      <ArrowUpRight className="w-4 h-4 text-blue-300" />
                     </button>
                   </div>
                 </div>
@@ -541,7 +541,7 @@ export default function AdminPage() {
               <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-                    <Activity className="w-5 h-5 text-emerald-600" /> Recent User Verification Checks
+                    <Activity className="w-5 h-5 text-blue-600" /> Recent User Verification Checks
                   </h2>
                   <span className="text-xs text-gray-400 font-medium">Live Activity Feed</span>
                 </div>
@@ -568,7 +568,7 @@ export default function AdminPage() {
                           <td className="py-3 font-semibold text-gray-900">{v.search_term || 'Medicine Query'}</td>
                           <td className="py-3">
                             <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                              v.result === 'verified' ? 'bg-emerald-100 text-emerald-800' :
+                              v.result === 'verified' ? 'bg-green-100 text-green-800' :
                               v.result === 'suspicious' ? 'bg-red-100 text-red-800' :
                               v.result === 'recalled' ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-700'
                             }`}>
@@ -615,7 +615,7 @@ export default function AdminPage() {
                   )}
                   {reports.map(r => (
                     <tr key={r.id} className="hover:bg-gray-50/80">
-                      <td className="py-3 font-mono text-xs font-bold text-emerald-800">{r.report_id}</td>
+                      <td className="py-3 font-mono text-xs font-bold text-blue-800">{r.report_id}</td>
                       <td className="py-3 font-semibold text-gray-900 max-w-[150px] truncate">{r.medicine_name}</td>
                       <td className="py-3 text-gray-500 max-w-[140px] truncate">{r.location}</td>
                       <td className="py-3">
@@ -697,11 +697,11 @@ export default function AdminPage() {
             <div className="max-w-2xl space-y-4">
               
               {/* OpenFDA Auto-fill Box */}
-              <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-6 space-y-3">
-                <h2 className="font-bold text-emerald-900 text-base flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-emerald-600" /> Auto-fill from OpenFDA Database
+              <div className="bg-blue-50 border border-blue-200 rounded-3xl p-6 space-y-3">
+                <h2 className="font-bold text-blue-900 text-base flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-blue-600" /> Auto-fill from OpenFDA Database
                 </h2>
-                <p className="text-xs text-emerald-700 leading-relaxed">
+                <p className="text-xs text-blue-700 leading-relaxed">
                   Search OpenFDA to auto-fill generic name, brand, manufacturer, and active ingredients instantly.
                 </p>
 
@@ -724,16 +724,16 @@ export default function AdminPage() {
 
                 {fdaResults.length > 0 && (
                   <div className="space-y-2 pt-2">
-                    <p className="text-xs font-semibold text-emerald-800">Click a result to auto-fill the form:</p>
+                    <p className="text-xs font-semibold text-blue-800">Click a result to auto-fill the form:</p>
                     {fdaResults.map((drug, i) => (
                       <button
                         key={i}
                         onClick={() => applyFDA(drug)}
-                        className="w-full text-left p-3 bg-white border border-emerald-200 hover:border-emerald-500 hover:bg-emerald-50 rounded-xl transition-all text-xs"
+                        className="w-full text-left p-3 bg-white border border-blue-200 hover:border-blue-500 hover:bg-blue-50 rounded-xl transition-all text-xs"
                       >
                         <div className="font-bold text-gray-900">{drug.generic_name} {drug.brand_name && <span className="text-gray-500 font-normal">({drug.brand_name})</span>}</div>
                         <div className="text-[11px] text-gray-500 mt-0.5">{drug.manufacturer}</div>
-                        {drug.active_ingredient && <div className="text-[11px] text-emerald-700 mt-0.5 truncate">Active: {drug.active_ingredient}</div>}
+                        {drug.active_ingredient && <div className="text-[11px] text-blue-700 mt-0.5 truncate">Active: {drug.active_ingredient}</div>}
                       </button>
                     ))}
                     <button onClick={() => setFdaResults([])} className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 mt-1">
@@ -746,12 +746,12 @@ export default function AdminPage() {
               {/* Add Medicine Form */}
               <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-4">
                 <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  <Plus className="w-5 h-5 text-emerald-600" /> Add New Verified Medicine
+                  <Plus className="w-5 h-5 text-blue-600" /> Add New Verified Medicine
                 </h2>
 
                 {addSuccess && (
-                  <div className="bg-emerald-100 border border-emerald-300 text-emerald-800 p-3 rounded-2xl text-xs font-bold flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div className="bg-blue-100 border border-blue-300 text-blue-800 p-3 rounded-2xl text-xs font-bold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
                     Medicine successfully added to registry!
                   </div>
                 )}
@@ -826,19 +826,19 @@ export default function AdminPage() {
             <div className="max-w-2xl bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-6">
               <div>
                 <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  <Upload className="w-5 h-5 text-emerald-600" /> Bulk Import Medicines from CSV
+                  <Upload className="w-5 h-5 text-blue-600" /> Bulk Import Medicines from CSV
                 </h2>
                 <p className="text-xs text-gray-500 mt-1">Upload a CSV file to add multiple medicines to the database at once.</p>
               </div>
 
               <div className="bg-slate-50 border-2 border-dashed border-gray-200 rounded-3xl p-8 text-center space-y-3">
-                <FileSpreadsheet className="w-10 h-10 text-emerald-600 mx-auto" />
+                <FileSpreadsheet className="w-10 h-10 text-blue-600 mx-auto" />
                 <h3 className="font-bold text-gray-800 text-sm">Select CSV File</h3>
                 <input ref={fileRef} type="file" accept=".csv" onChange={handleCSVFile} className="hidden" id="csv-file-input" />
                 <label htmlFor="csv-file-input" className="btn-secondary text-xs inline-flex cursor-pointer py-2 px-4">
                   Browse File
                 </label>
-                {csvFileName && <p className="text-xs text-emerald-700 font-bold">{csvFileName} ({csvRows.length} rows detected)</p>}
+                {csvFileName && <p className="text-xs text-blue-700 font-bold">{csvFileName} ({csvRows.length} rows detected)</p>}
               </div>
 
               <div className="flex gap-3">
@@ -852,9 +852,9 @@ export default function AdminPage() {
               </div>
 
               {bulkDone && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs text-emerald-900 font-bold flex items-center justify-between">
+                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs text-blue-900 font-bold flex items-center justify-between">
                   <span>Import Finished: {bulkDone.success} added successfully ({bulkDone.failed} failed).</span>
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  <CheckCircle2 className="w-5 h-5 text-blue-600" />
                 </div>
               )}
             </div>

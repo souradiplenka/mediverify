@@ -54,16 +54,16 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#E2E8F0] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
 
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 bg-emerald-700 rounded-lg flex items-center justify-center shadow-sm group-hover:bg-emerald-800 transition-colors">
+              <div className="w-8 h-8 bg-[#2563EB] rounded-lg flex items-center justify-center shadow-sm group-hover:bg-[#1D4ED8] transition-colors">
                 <Shield className="w-4.5 h-4.5 text-white" />
               </div>
-              <span className="font-bold text-emerald-900 text-lg tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <span className="font-bold text-[#0F172A] text-lg tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                 MediVerify
               </span>
             </Link>
@@ -76,8 +76,8 @@ export default function Navbar() {
                   href={href}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 ${
                     pathname === href
-                      ? 'bg-emerald-50 text-emerald-800 font-bold'
-                      : 'text-gray-600 hover:text-emerald-800 hover:bg-emerald-50'
+                      ? 'bg-[#EFF6FF] text-[#2563EB] font-bold'
+                      : 'text-[#64748B] hover:text-[#2563EB] hover:bg-[#EFF6FF]'
                   }`}
                 >
                   {label}
@@ -86,14 +86,14 @@ export default function Navbar() {
 
               {/* User Profile / Auth State */}
               {user ? (
-                <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-200">
-                  <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-200">
-                    <User className="w-3.5 h-3.5 text-emerald-600" />
+                <div className="flex items-center gap-2 ml-2 pl-2 border-l border-[#E2E8F0]">
+                  <div className="flex items-center gap-1.5 bg-[#EFF6FF] text-[#2563EB] px-3 py-1 rounded-full text-xs font-semibold border border-[#DBEAFE]">
+                    <User className="w-3.5 h-3.5 text-[#2563EB]" />
                     <span className="max-w-[100px] truncate">{displayName}</span>
                   </div>
                   <button
                     onClick={handleSignOut}
-                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-[#DC2626] hover:bg-red-50 rounded-full transition-colors"
                     title="Sign Out"
                   >
                     <LogOut className="w-4 h-4" />
@@ -102,7 +102,7 @@ export default function Navbar() {
               ) : (
                 <button
                   onClick={() => openAuth('signin')}
-                  className="ml-2 flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-3.5 py-1.5 rounded-full border border-emerald-200 transition-all"
+                  className="ml-2 flex items-center gap-1 text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] bg-[#EFF6FF] hover:bg-[#DBEAFE] px-3.5 py-1.5 rounded-full border border-[#DBEAFE] transition-all"
                 >
                   <LogIn className="w-3.5 h-3.5" /> Sign In
                 </button>
@@ -111,7 +111,7 @@ export default function Navbar() {
               {/* CTA */}
               <Link
                 href="/report"
-                className="ml-2 flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all shadow-sm hover:shadow-md"
+                className="ml-2 flex items-center gap-1.5 bg-[#DC2626] hover:bg-red-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all shadow-sm hover:shadow-md"
               >
                 <AlertTriangle className="w-3.5 h-3.5" />
                 Report Fake
@@ -120,7 +120,7 @@ export default function Navbar() {
 
             {/* Mobile menu button */}
             <button
-              className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+              className="md:hidden p-2 rounded-lg text-[#64748B] hover:bg-[#EFF6FF]"
               onClick={() => setOpen(!open)}
             >
               {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -130,11 +130,11 @@ export default function Navbar() {
 
         {/* Mobile Dropdown */}
         {open && (
-          <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-1">
+          <div className="md:hidden border-t border-[#E2E8F0] bg-white px-4 py-3 space-y-1">
             {user && (
-              <div className="px-4 py-2 mb-2 bg-emerald-50 rounded-xl text-xs font-semibold text-emerald-800 flex items-center justify-between">
+              <div className="px-4 py-2 mb-2 bg-[#EFF6FF] rounded-xl text-xs font-semibold text-[#2563EB] flex items-center justify-between">
                 <span className="truncate">Signed in as: {displayName}</span>
-                <button onClick={handleSignOut} className="text-red-600 font-bold ml-2">Sign Out</button>
+                <button onClick={handleSignOut} className="text-[#DC2626] font-bold ml-2">Sign Out</button>
               </div>
             )}
             {NAV_LINKS.map(({ href, label }) => (
@@ -144,8 +144,8 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className={`block px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   pathname === href
-                    ? 'bg-emerald-50 text-emerald-800 font-semibold'
-                    : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-800'
+                    ? 'bg-[#EFF6FF] text-[#2563EB] font-semibold'
+                    : 'text-[#64748B] hover:bg-[#EFF6FF] hover:text-[#2563EB]'
                 }`}
               >
                 {label}
@@ -154,7 +154,7 @@ export default function Navbar() {
             {!user && (
               <button
                 onClick={() => { setOpen(false); openAuth('signin'); }}
-                className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-700 bg-emerald-50"
+                className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[#2563EB] bg-[#EFF6FF]"
               >
                 <LogIn className="w-4 h-4" /> Sign In / Create Account
               </button>
@@ -162,7 +162,7 @@ export default function Navbar() {
             <Link
               href="/report"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[#DC2626] hover:bg-red-50 transition-colors"
             >
               <AlertTriangle className="w-4 h-4" /> Report Fake Medicine
             </Link>

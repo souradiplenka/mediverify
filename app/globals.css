@@ -6,28 +6,28 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════
-   NATURAL WARM TRUSTWORTHY MEDICAL PALETTE
-   - Primary: "#0D9488" — Teal
-   - Primary Hover: "#0F766E" — Dark Teal
-   - Secondary: "#E0F7F5" — Very Light Teal
-   - Background: "#F8FAFA" — Soft Medical White
-   - Cards/Surface: "#FFFFFF" — White
-   - Main Text: "#12343B" — Deep Medical Blue-Teal
-   - Secondary Text: "#64748B" — Soft Slate
-   - Borders: "#D9E7E7" — Subtle Teal-Gray
-   - Accent: "#2563EB" — Medical Blue
-   - Success: "#16A34A" — Green
-   - Error/Alert: "#DC2626" — Red
-═══════════════════════════════════════ */
+   BLUE & WHITE MEDICAL PALETTE
+   - Primary Blue: "#2563EB"
+   - Dark Blue / Hover: "#1D4ED8"
+   - Light Blue: "#DBEAFE"
+   - Very Light Blue: "#F8FAFC"
+   - Soft Blue Surface: "#EFF6FF"
+   - White: "#FFFFFF"
+   - Main Text: "#0F172A"
+   - Secondary Text: "#64748B"
+   - Border: "#E2E8F0"
+   - Success Green: "#16A34A"
+   - Error/Alert Red: "#DC2626"
+ ═══════════════════════════════════════ */
 :root {
-  --primary:        #0D9488;
-  --primary-hover:  #0F766E;
-  --secondary:      #E0F7F5;
-  --background:     #F8FAFA;
-  --surface:        #FFFFFF;
-  --text-main:      #12343B;
+  --primary:        #2563EB;
+  --primary-hover:  #1D4ED8;
+  --secondary:      #DBEAFE;
+  --background:     #FFFFFF;
+  --surface:        #EFF6FF;
+  --text-main:      #0F172A;
   --text-secondary: #64748B;
-  --border:         #D9E7E7;
+  --border:         #E2E8F0;
   --accent:         #2563EB;
   --success:        #16A34A;
   --error:          #DC2626;
@@ -35,13 +35,13 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--background);
-  color: var(--text-main);
+  background-color: #FFFFFF;
+  color: #0F172A;
 }
 
 h1, h2, h3, h4 {
   font-family: 'Playfair Display', serif;
-  color: var(--text-main);
+  color: #0F172A;
 }
 
 /* ═══════════════════════════════════════
@@ -51,10 +51,10 @@ h1, h2, h3, h4 {
 
   /* Buttons */
   .btn-primary {
-    @apply bg-[#0D9488] hover:bg-[#0F766E] text-white font-semibold px-6 py-2.5 rounded-full transition-all duration-200 flex items-center gap-2 cursor-pointer shadow-sm hover:shadow-md;
+    @apply bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold px-6 py-2.5 rounded-full transition-all duration-200 flex items-center gap-2 cursor-pointer shadow-sm hover:shadow-md;
   }
   .btn-secondary {
-    @apply bg-[#E0F7F5] hover:bg-[#CCF1EE] text-[#0F766E] font-semibold px-6 py-2.5 rounded-full border border-[#D9E7E7] transition-all duration-200 flex items-center gap-2 cursor-pointer;
+    @apply bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#1D4ED8] font-semibold px-6 py-2.5 rounded-full border border-[#E2E8F0] transition-all duration-200 flex items-center gap-2 cursor-pointer;
   }
   .btn-danger {
     @apply bg-[#DC2626] hover:bg-red-700 text-white font-semibold px-6 py-2.5 rounded-full transition-all duration-200 flex items-center gap-2 cursor-pointer;
@@ -65,27 +65,27 @@ h1, h2, h3, h4 {
 
   /* Cards */
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-[#D9E7E7] p-6;
+    @apply bg-white rounded-2xl shadow-sm border border-[#E2E8F0] p-6;
   }
   .card-green {
-    @apply bg-[#E0F7F5] rounded-2xl border border-[#D9E7E7] p-6;
+    @apply bg-[#EFF6FF] rounded-2xl border border-[#E2E8F0] p-6;
   }
 
   /* Inputs */
   .input-field {
-    @apply w-full px-4 py-2.5 border border-[#D9E7E7] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0D9488] focus:border-transparent text-[#12343B] bg-white transition-all;
+    @apply w-full px-4 py-2.5 border border-[#E2E8F0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent text-[#0F172A] bg-white transition-all;
   }
 
   /* Section headings */
   .section-title {
-    @apply text-3xl md:text-4xl font-bold text-[#12343B] mb-3;
+    @apply text-3xl md:text-4xl font-bold text-[#0F172A] mb-3;
     font-family: 'Playfair Display', serif;
   }
   .section-subtitle {
     @apply text-[#64748B] text-base mb-8 max-w-2xl;
   }
   .stat-card {
-    @apply bg-white rounded-2xl shadow-sm border border-[#D9E7E7] p-5 flex flex-col gap-1;
+    @apply bg-white rounded-2xl shadow-sm border border-[#E2E8F0] p-5 flex flex-col gap-1;
   }
 }
 
@@ -121,8 +121,8 @@ h1, h2, h3, h4 {
 .animate-gradient { background-size: 200% 200%; animation: gradient-shift 3s ease infinite; }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(13,148,136,0.3); }
-  50%       { box-shadow: 0 0 0 8px rgba(13,148,136,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0.3); }
+  50%       { box-shadow: 0 0 0 8px rgba(37,99,235,0); }
 }
 .pulse-verified { animation: pulse-glow 2s ease-in-out infinite; }
 

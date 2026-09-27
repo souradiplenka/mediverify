@@ -278,19 +278,19 @@ function QRScanner({ onScan }: { onScan: (text: string) => void }) {
   return (
     <div className="text-center max-w-md mx-auto">
       <div id="qr-reader-file-hidden" className="hidden" />
-      <div id="qr-reader" ref={divRef} className="mx-auto rounded-2xl overflow-hidden border-2 border-emerald-300 shadow-inner" />
+      <div id="qr-reader" ref={divRef} className="mx-auto rounded-2xl overflow-hidden border-2 border-blue-300 shadow-inner" />
       
       {started && (
-        <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center justify-center gap-2">
-          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping shrink-0" />
+        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded-xl flex items-center justify-center gap-2">
+          <span className="w-2 h-2 bg-blue-500 rounded-full animate-ping shrink-0" />
           <span><strong>Scanning Live:</strong> Center the QR code inside the white square frame <strong className="text-base font-mono">[ ]</strong></span>
         </div>
       )}
 
       {!started && (
         <div className="mt-4 space-y-6">
-          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6">
-            <Camera className="w-12 h-12 text-emerald-600 mx-auto mb-3 opacity-80" />
+          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6">
+            <Camera className="w-12 h-12 text-blue-600 mx-auto mb-3 opacity-80" />
             <h3 className="font-bold text-gray-800 text-base mb-1">Live Camera Scan</h3>
             <p className="text-xs text-gray-500 mb-4">Point your camera at the barcode or QR code on the packaging.</p>
             <button onClick={startScanner} className="btn-primary mx-auto">
@@ -503,17 +503,17 @@ function PurposeSection({ purpose }: { purpose: { uses: string[]; howItWorks: st
   return (
     <div className="space-y-3">
       {/* Why taken */}
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <div className="flex items-center gap-1.5 mb-2">
-          <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">Purpose — Why This Medicine is Taken</span>
+          <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+          <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Purpose — Why This Medicine is Taken</span>
         </div>
         <div className="flex flex-wrap gap-1.5 mb-2">
           {purpose.uses.map((use, i) => (
-            <span key={i} className="inline-block bg-emerald-100 text-emerald-800 text-xs font-medium px-2.5 py-1 rounded-full">{use}</span>
+            <span key={i} className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full">{use}</span>
           ))}
         </div>
-        <p className="text-xs text-emerald-700 leading-relaxed">
+        <p className="text-xs text-blue-700 leading-relaxed">
           <span className="font-semibold">How it works: </span>{purpose.howItWorks}
         </p>
       </div>
@@ -835,7 +835,7 @@ function VerifyContent() {
 
                   {/* Best Match — first result */}
                   <div className="mt-4 mb-2 flex items-center gap-2">
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 border border-emerald-200 px-3 py-1 rounded-full uppercase tracking-wide">
+                    <span className="text-xs font-bold text-blue-700 bg-blue-100 border border-blue-200 px-3 py-1 rounded-full uppercase tracking-wide">
                       ✅ Best Match — This is the medicine you searched for
                     </span>
                   </div>

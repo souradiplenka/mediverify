@@ -242,8 +242,8 @@ export default function HealthRiskDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex items-center gap-3 text-emerald-800">
-          <HeartPulse className="w-6 h-6 animate-pulse text-emerald-600" />
+        <div className="flex items-center gap-3 text-blue-800">
+          <HeartPulse className="w-6 h-6 animate-pulse text-blue-600" />
           <span className="font-semibold text-sm">Loading health profile & treatment calendar…</span>
         </div>
       </div>
@@ -256,13 +256,13 @@ export default function HealthRiskDashboard() {
       <div className="min-h-[85vh] flex items-center justify-center px-4 bg-slate-50/80 py-12">
         <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-gray-100 max-w-md w-full text-center space-y-6">
           
-          <div className="w-16 h-16 bg-emerald-100 text-emerald-800 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
-            <Lock className="w-8 h-8 text-emerald-700" />
+          <div className="w-16 h-16 bg-blue-100 text-blue-800 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
+            <Lock className="w-8 h-8 text-blue-700" />
           </div>
 
           <div>
-            <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3.5 py-1 rounded-full text-xs font-bold border border-emerald-200 mb-3">
-              <HeartPulse className="w-3.5 h-3.5 text-emerald-600" /> Sign In Required
+            <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-800 px-3.5 py-1 rounded-full text-xs font-bold border border-blue-200 mb-3">
+              <HeartPulse className="w-3.5 h-3.5 text-blue-600" /> Sign In Required
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
               Access Your Health Profile
@@ -275,7 +275,7 @@ export default function HealthRiskDashboard() {
           <div className="space-y-3 pt-2">
             <button
               onClick={() => setAuthModalOpen(true)}
-              className="btn-primary w-full justify-center py-3.5 text-sm font-bold shadow-lg shadow-emerald-500/20"
+              className="btn-primary w-full justify-center py-3.5 text-sm font-bold shadow-lg shadow-blue-500/20"
             >
               <LogIn className="w-4 h-4" /> Sign In / Create Account
             </button>
@@ -307,19 +307,19 @@ export default function HealthRiskDashboard() {
     <div className="min-h-screen bg-slate-50/70 pb-20">
       
       {/* ── Top Header ── */}
-      <section className="bg-emerald-950 text-white pt-10 pb-16 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]" />
+      <section className="bg-[#0F172A] text-white pt-10 pb-16 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#2563EB_1px,transparent_1px)] [background-size:16px_16px]" />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="inline-flex items-center gap-1.5 bg-emerald-900/80 border border-emerald-700/60 px-3 py-1 rounded-full text-xs font-semibold text-emerald-300">
-                  <HeartPulse className="w-3.5 h-3.5 text-emerald-400" /> Patient Health & Risk Predictor
+                <span className="inline-flex items-center gap-1.5 bg-blue-900/80 border border-blue-700/60 px-3 py-1 rounded-full text-xs font-semibold text-blue-300">
+                  <HeartPulse className="w-3.5 h-3.5 text-blue-400" /> Patient Health & Risk Predictor
                 </span>
                 {user ? (
-                  <span className="inline-flex items-center gap-1.5 bg-emerald-800/90 border border-emerald-600/80 px-3 py-1 rounded-full text-xs font-semibold text-emerald-100">
-                    <Cloud className="w-3 h-3 text-emerald-400" /> Cloud Synced ({user.email})
+                  <span className="inline-flex items-center gap-1.5 bg-blue-800/90 border border-blue-600/80 px-3 py-1 rounded-full text-xs font-semibold text-blue-100">
+                    <Cloud className="w-3 h-3 text-blue-400" /> Cloud Synced ({user.email})
                   </span>
                 ) : (
                   <button
@@ -334,7 +334,7 @@ export default function HealthRiskDashboard() {
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                 {user ? `${userName}'s Health Profile & Risk` : 'Health Profile & Risk Dashboard'}
               </h1>
-              <p className="text-emerald-200/80 text-sm mt-2 max-w-xl leading-relaxed">
+              <p className="text-blue-200/80 text-sm mt-2 max-w-xl leading-relaxed">
                 Track your active medications, tick off daily doses on your treatment calendar, set batch expiry alerts, and view predicted side-effect risks.
               </p>
             </div>
@@ -343,13 +343,13 @@ export default function HealthRiskDashboard() {
             <div className="flex flex-wrap gap-2 shrink-0">
               <button
                 onClick={() => setShowAddMedModal(true)}
-                className="bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-sm px-4 py-2.5 rounded-full transition-all shadow-lg flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-4 py-2.5 rounded-full transition-all shadow-lg flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" /> Add Active Medicine
               </button>
               <button
                 onClick={handleResetSampleData}
-                className="bg-white/10 hover:bg-white/20 text-emerald-100 text-sm font-medium px-4 py-2.5 rounded-full transition-all flex items-center gap-2 border border-white/10"
+                className="bg-white/10 hover:bg-white/20 text-blue-100 text-sm font-medium px-4 py-2.5 rounded-full transition-all flex items-center gap-2 border border-white/10"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Sample Data
               </button>
@@ -404,11 +404,11 @@ export default function HealthRiskDashboard() {
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-8">
           <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center shadow-inner">
+              <div className="w-12 h-12 bg-blue-100 text-blue-800 rounded-2xl flex items-center justify-center shadow-inner">
                 <User className="w-6 h-6" />
               </div>
               <div>
-                <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">Step 1 · Patient Profile</span>
+                <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Step 1 · Patient Profile</span>
                 <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                   {profile.name}
                 </h2>
@@ -430,7 +430,7 @@ export default function HealthRiskDashboard() {
             </div>
             <div>
               <span className="text-gray-400 block font-medium">Active Medications</span>
-              <span className="font-semibold text-emerald-700 text-sm">{activeTracks.length} Active Intake</span>
+              <span className="font-semibold text-blue-700 text-sm">{activeTracks.length} Active Intake</span>
             </div>
             <div>
               <span className="text-gray-400 block font-medium">Known Allergies</span>
@@ -451,7 +451,7 @@ export default function HealthRiskDashboard() {
         <div className="space-y-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">Step 2 & 3 · Daily Treatment Calendar</span>
+              <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Step 2 & 3 · Daily Treatment Calendar</span>
               <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                 Active Medication Intake & Expiry Alerts
               </h2>
@@ -467,7 +467,7 @@ export default function HealthRiskDashboard() {
 
           {activeTracks.length === 0 ? (
             <div className="bg-white rounded-3xl p-12 border border-dashed border-gray-200 text-center">
-              <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-3 opacity-60" />
+              <CheckCircle2 className="w-12 h-12 text-blue-400 mx-auto mb-3 opacity-60" />
               <h3 className="font-bold text-gray-800 text-base">No Active Medications Currently</h3>
               <p className="text-xs text-gray-500 mt-1 mb-4">You have completed all active treatment courses or marked them recovered.</p>
               <button onClick={handleResetSampleData} className="btn-secondary text-xs mx-auto">
@@ -501,7 +501,7 @@ export default function HealthRiskDashboard() {
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
                       <div>
                         <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                          <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                          <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                             Day {prediction.currentDayNum} of {track.durationDays}
                           </span>
 
@@ -542,7 +542,7 @@ export default function HealthRiskDashboard() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleMarkRecovered(track.id)}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-full transition-all shadow-sm flex items-center gap-1.5"
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-full transition-all shadow-sm flex items-center gap-1.5"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" /> Mark as Recovered
                         </button>
@@ -571,7 +571,7 @@ export default function HealthRiskDashboard() {
                     {/* Treatment Calendar Checkboxes */}
                     <div>
                       <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                        <CalendarIcon className="w-4 h-4 text-emerald-600" /> Daily Dose Check Calendar
+                        <CalendarIcon className="w-4 h-4 text-blue-600" /> Daily Dose Check Calendar
                       </h4>
 
                       <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
@@ -585,9 +585,9 @@ export default function HealthRiskDashboard() {
                               onClick={() => handleToggleDateTaken(track.id, dateStr)}
                               className={`p-2.5 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1 ${
                                 isCompleted
-                                  ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
+                                  ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
                                   : isToday
-                                  ? 'bg-emerald-50 border-emerald-400 text-emerald-900 font-bold ring-2 ring-emerald-300'
+                                  ? 'bg-blue-50 border-blue-400 text-blue-900 font-bold ring-2 ring-blue-300'
                                   : 'bg-slate-50 border-slate-200/80 text-gray-700 hover:bg-slate-100'
                               }`}
                             >
@@ -597,7 +597,7 @@ export default function HealthRiskDashboard() {
                                 {isCompleted ? (
                                   <Check className="w-4 h-4 text-white stroke-[3]" />
                                 ) : (
-                                  <div className={`w-4 h-4 rounded-full border-2 ${isToday ? 'border-emerald-500' : 'border-gray-300'}`} />
+                                  <div className={`w-4 h-4 rounded-full border-2 ${isToday ? 'border-blue-500' : 'border-gray-300'}`} />
                                 )}
                               </div>
                             </button>
@@ -610,11 +610,11 @@ export default function HealthRiskDashboard() {
                     <div className="bg-slate-50 border border-slate-200/70 rounded-2xl p-5 space-y-3">
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
-                          <Stethoscope className="w-4 h-4 text-emerald-600" /> Dynamic Risk & Side Effect Predictor
+                          <Stethoscope className="w-4 h-4 text-blue-600" /> Dynamic Risk & Side Effect Predictor
                         </h4>
 
                         <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${
-                          prediction.overallRiskLevel === 'low' ? 'bg-emerald-100 text-emerald-800' :
+                          prediction.overallRiskLevel === 'low' ? 'bg-blue-100 text-blue-800' :
                           prediction.overallRiskLevel === 'moderate' ? 'bg-amber-100 text-amber-800' :
                           prediction.overallRiskLevel === 'high' ? 'bg-orange-100 text-orange-800' :
                           'bg-red-100 text-red-900 border border-red-300'
@@ -665,7 +665,7 @@ export default function HealthRiskDashboard() {
           {recoveredTracks.length > 0 && (
             <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-4">
               <h3 className="font-bold text-gray-900 text-base flex items-center gap-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" /> Completed & Recovered Treatments ({recoveredTracks.length})
+                <CheckCircle2 className="w-5 h-5 text-blue-600" /> Completed & Recovered Treatments ({recoveredTracks.length})
               </h3>
               <div className="divide-y divide-gray-100">
                 {recoveredTracks.map(t => (
@@ -674,7 +674,7 @@ export default function HealthRiskDashboard() {
                       <span className="font-bold text-gray-800 text-sm block">{t.brand || t.name}</span>
                       <span className="text-gray-400">Completed on {new Date(t.recoveredAt || '').toLocaleDateString('en-IN')}</span>
                     </div>
-                    <span className="bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full text-[10px]">
+                    <span className="bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded-full text-[10px]">
                       Recovered
                     </span>
                   </div>

@@ -299,19 +299,19 @@ export default function HospitalsPage() {
     <div className="min-h-screen bg-slate-50/70 pb-20">
       
       {/* ── HERO BANNER & CITY SEARCH ── */}
-      <section className="bg-emerald-950 text-white pt-10 pb-16 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]" />
+      <section className="bg-[#0F172A] text-white pt-10 pb-16 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#2563EB_1px,transparent_1px)] [background-size:16px_16px]" />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 bg-emerald-900/80 border border-emerald-700/60 px-3 py-1 rounded-full text-xs font-semibold text-emerald-300 mb-3">
-                <MapPin className="w-3.5 h-3.5 text-emerald-400" /> Live Nearby Healthcare Finder
+              <div className="inline-flex items-center gap-2 bg-blue-900/80 border border-blue-700/60 px-3 py-1 rounded-full text-xs font-semibold text-blue-300 mb-3">
+                <MapPin className="w-3.5 h-3.5 text-blue-400" /> Live Nearby Healthcare Finder
               </div>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                 Nearby Hospitals & Emergency Map
               </h1>
-              <p className="text-emerald-200/80 text-sm mt-2 max-w-xl leading-relaxed">
+              <p className="text-blue-200/80 text-sm mt-2 max-w-xl leading-relaxed">
                 Type your area, pincode, or city name below, or click <span className="text-white font-bold">"Use My Exact GPS Location"</span> for real 24/7 emergency medical centers.
               </p>
             </div>
@@ -320,7 +320,7 @@ export default function HospitalsPage() {
             <button
               onClick={handleDetectGPS}
               disabled={locationLoading}
-              className="bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-xs sm:text-sm px-5 py-3 rounded-full transition-all shadow-lg flex items-center justify-center gap-2 shrink-0 border border-emerald-400/40"
+              className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs sm:text-sm px-5 py-3 rounded-full transition-all shadow-lg flex items-center justify-center gap-2 shrink-0 border border-blue-400/40"
             >
               {locationLoading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> {loadingText}</>
@@ -334,19 +334,19 @@ export default function HospitalsPage() {
           <div className="mt-8 bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/15 max-w-3xl">
             <form onSubmit={(e) => { e.preventDefault(); handleCitySearch(cityInput); }} className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400" />
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400" />
                 <input
                   type="text"
                   placeholder="Enter your Area, Suburb, or Pincode (e.g. Patia, Saheed Nagar, 751024, Cuttack, Kolkata)..."
                   value={cityInput}
                   onChange={e => setCityInput(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-white text-gray-900 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-medium placeholder:text-gray-400"
+                  className="w-full pl-12 pr-4 py-3 bg-white text-gray-900 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium placeholder:text-gray-400"
                 />
               </div>
               <button
                 type="submit"
                 disabled={locationLoading || !cityInput.trim()}
-                className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-2xl transition-all shadow-md text-sm flex items-center justify-center gap-2"
+                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-2xl transition-all shadow-md text-sm flex items-center justify-center gap-2"
               >
                 {locationLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 Find Hospitals
@@ -354,13 +354,13 @@ export default function HospitalsPage() {
             </form>
 
             {/* Quick City Buttons */}
-            <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-white/10 text-xs text-emerald-200">
-              <span className="font-semibold text-emerald-300">Quick Jump Area:</span>
+            <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-white/10 text-xs text-blue-200">
+              <span className="font-semibold text-blue-300">Quick Jump Area:</span>
               {['Patia', 'Saheed Nagar', 'Cuttack', 'Bhubaneswar', 'Kolkata', 'Delhi'].map(cityName => (
                 <button
                   key={cityName}
                   onClick={() => { setCityInput(cityName); handleCitySearch(cityName); }}
-                  className="bg-emerald-900/60 hover:bg-emerald-700 text-emerald-200 hover:text-white px-3 py-1 rounded-full transition-all border border-emerald-700/50 text-[11px]"
+                  className="bg-blue-900/60 hover:bg-blue-700 text-blue-200 hover:text-white px-3 py-1 rounded-full transition-all border border-blue-700/50 text-[11px]"
                 >
                   📍 {cityName}
                 </button>
@@ -376,16 +376,16 @@ export default function HospitalsPage() {
         
         {/* LIVE LOCATION BADGE WITH EDITABLE NEIGHBORHOOD OPTION */}
         {userAddress && (
-          <div className="bg-emerald-900 text-white rounded-3xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-emerald-700/80">
+          <div className="bg-[#0F172A] text-white rounded-3xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-blue-800">
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="w-10 h-10 bg-emerald-500/30 rounded-2xl flex items-center justify-center shrink-0 border border-emerald-400/40">
-                <MapPin className="w-5 h-5 text-emerald-300 animate-bounce" />
+              <div className="w-10 h-10 bg-blue-500/30 rounded-2xl flex items-center justify-center shrink-0 border border-blue-400/40">
+                <MapPin className="w-5 h-5 text-blue-300 animate-bounce" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] uppercase font-bold text-emerald-300 tracking-wider">Active Search Center</span>
+                  <span className="text-[10px] uppercase font-bold text-blue-300 tracking-wider">Active Search Center</span>
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                    locationSource === 'Exact GPS' ? 'bg-emerald-500 text-white' : 'bg-emerald-800 text-emerald-200'
+                    locationSource === 'Exact GPS' ? 'bg-blue-600 text-white' : 'bg-blue-900 text-blue-200'
                   }`}>
                     Mode: {locationSource}
                   </span>
@@ -398,13 +398,13 @@ export default function HospitalsPage() {
                       placeholder="Type your area (e.g. Patia, Saheed Nagar, 751024)..."
                       value={areaInput}
                       onChange={e => setAreaInput(e.target.value)}
-                      className="px-3 py-1 bg-white text-gray-900 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                      className="px-3 py-1 bg-white text-gray-900 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
                       autoFocus
                     />
-                    <button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                    <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Save
                     </button>
-                    <button type="button" onClick={() => setIsEditingArea(false)} className="text-xs text-emerald-300 hover:underline">
+                    <button type="button" onClick={() => setIsEditingArea(false)} className="text-xs text-blue-300 hover:underline">
                       Cancel
                     </button>
                   </form>
@@ -413,10 +413,10 @@ export default function HospitalsPage() {
                     {userAddress}
                     <button
                       onClick={() => { setAreaInput(userAddress); setIsEditingArea(true); }}
-                      className="text-[11px] bg-emerald-800 hover:bg-emerald-700 text-emerald-200 px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1 border border-emerald-600 transition-all"
+                      className="text-[11px] bg-blue-900 hover:bg-blue-800 text-blue-200 px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1 border border-blue-700 transition-all"
                       title="Click to refine your exact neighborhood"
                     >
-                      <Edit3 className="w-3 h-3 text-emerald-300" /> Refine Neighborhood
+                      <Edit3 className="w-3 h-3 text-blue-300" /> Refine Neighborhood
                     </button>
                   </p>
                 )}
@@ -426,7 +426,7 @@ export default function HospitalsPage() {
             <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
               <button
                 onClick={handleDetectGPS}
-                className="text-xs bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold px-4 py-2 rounded-full shadow flex items-center gap-1.5 transition-all"
+                className="text-xs bg-blue-600 hover:bg-blue-500 text-white font-extrabold px-4 py-2 rounded-full shadow flex items-center gap-1.5 transition-all"
               >
                 <Compass className="w-3.5 h-3.5" /> Trigger Exact GPS
               </button>
@@ -514,7 +514,7 @@ export default function HospitalsPage() {
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`px-3.5 py-2 rounded-full text-xs font-semibold transition-all ${
                     selectedCategory === cat.id
-                      ? 'bg-emerald-700 text-white shadow-sm'
+                      ? 'bg-blue-600 text-white shadow-sm'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
@@ -552,12 +552,12 @@ export default function HospitalsPage() {
           <div className="lg:col-span-6 space-y-4">
             <div className="flex items-center justify-between text-xs text-gray-500 font-semibold">
               <span>Found {filteredHospitals.length} Healthcare Facilities</span>
-              {userLocation && <span className="text-emerald-700 font-bold">🎯 Sorted nearest-first</span>}
+              {userLocation && <span className="text-blue-600 font-bold">🎯 Sorted nearest-first</span>}
             </div>
 
             {locationLoading ? (
               <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-sm space-y-3">
-                <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
+                <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto" />
                 <p className="text-sm font-semibold text-gray-700">{loadingText}</p>
                 <p className="text-xs text-gray-400">Fetching real nearby hospitals & calculating distances…</p>
               </div>
@@ -579,8 +579,8 @@ export default function HospitalsPage() {
                       onClick={() => setSelectedHospital(hosp)}
                       className={`bg-white rounded-3xl border p-5 cursor-pointer transition-all ${
                         isSelected
-                          ? 'border-emerald-500 shadow-md ring-2 ring-emerald-500/20'
-                          : 'border-gray-200/80 hover:border-emerald-300 shadow-sm'
+                          ? 'border-blue-600 shadow-md ring-2 ring-blue-500/20'
+                          : 'border-gray-200/80 hover:border-blue-300 shadow-sm'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3 mb-2">
@@ -588,12 +588,12 @@ export default function HospitalsPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
                               hosp.category === 'emergency' ? 'bg-red-100 text-red-700' :
-                              hosp.category === 'pharmacy' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-800'
+                              hosp.category === 'pharmacy' ? 'bg-blue-100 text-blue-700' : 'bg-blue-100 text-blue-800'
                             }`}>
                               {hosp.category}
                             </span>
                             {hosp.is24x7 && (
-                              <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full">
                                 24/7 Open
                               </span>
                             )}
@@ -605,14 +605,14 @@ export default function HospitalsPage() {
                         </div>
 
                         {distanceKm !== null && (
-                          <div className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full text-xs font-extrabold shrink-0 shadow-sm">
+                          <div className="bg-blue-50 text-blue-800 border border-blue-200 px-3 py-1 rounded-full text-xs font-extrabold shrink-0 shadow-sm">
                             {distanceKm} km away
                           </div>
                         )}
                       </div>
 
                       <p className="text-xs text-gray-500 flex items-center gap-1.5 mb-3">
-                        <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                         <span className="truncate font-medium">{hosp.address}</span>
                       </p>
 
@@ -620,7 +620,7 @@ export default function HospitalsPage() {
                         <a
                           href={`tel:${hosp.phone}`}
                           onClick={e => e.stopPropagation()}
-                          className="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1.5"
+                          className="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1.5"
                         >
                           <Phone className="w-3.5 h-3.5" /> Call {hosp.phone}
                         </a>
@@ -630,7 +630,7 @@ export default function HospitalsPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={e => e.stopPropagation()}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-1.5 rounded-full transition-all shadow-sm flex items-center gap-1"
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3.5 py-1.5 rounded-full transition-all shadow-sm flex items-center gap-1"
                         >
                           <Navigation className="w-3.5 h-3.5" /> Directions
                         </a>
@@ -647,12 +647,12 @@ export default function HospitalsPage() {
             <div className="lg:col-span-6 bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sticky top-20">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-emerald-600" />
+                  <MapPin className="w-5 h-5 text-blue-600" />
                   <h3 className="font-bold text-gray-900 text-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
                     Interactive Map Canvas
                   </h3>
                 </div>
-                <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 truncate max-w-[200px]">
+                <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 truncate max-w-[200px]">
                   {activeHospital.name}
                 </span>
               </div>
@@ -672,11 +672,11 @@ export default function HospitalsPage() {
               </div>
 
               {/* Action Footer */}
-              <div className="mt-4 p-4 bg-emerald-50/60 border border-emerald-100 rounded-2xl">
+              <div className="mt-4 p-4 bg-blue-50/60 border border-blue-100 rounded-2xl">
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <h4 className="font-bold text-gray-900 text-sm">{activeHospital.name}</h4>
                   {userLocation && (
-                    <span className="text-xs font-extrabold text-emerald-800 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                    <span className="text-xs font-extrabold text-blue-800 bg-white px-2.5 py-0.5 rounded-full border border-blue-200 shrink-0">
                       {calculateDistanceKm(userLocation.lat, userLocation.lng, activeHospital.lat, activeHospital.lng)} km away
                     </span>
                   )}
@@ -694,7 +694,7 @@ export default function HospitalsPage() {
                     href={`https://www.google.com/maps/dir/?api=1&destination=${activeHospital.lat},${activeHospital.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white font-semibold py-2 text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm text-center"
+                    className="flex-1 bg-blue-900 hover:bg-blue-950 text-white font-semibold py-2 text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm text-center"
                   >
                     <Navigation className="w-3.5 h-3.5" /> Google Maps Directions
                   </a>

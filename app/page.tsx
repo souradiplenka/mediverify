@@ -8,7 +8,9 @@ import {
   Search, Shield, CheckCircle, AlertTriangle, Database,
   ClipboardList, Activity, ArrowRight, Pill, QrCode, Globe
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, query as firestoreQuery, where, limit, getCountFromServer } from 'firebase/firestore';
+import { seedMedicinesToFirestore, SAMPLE_MEDICINES } from '@/lib/seedFirestore';
 import MedicineCard from '@/components/MedicineCard';
 import { Medicine } from '@/types';
 
@@ -38,20 +40,58 @@ export default function HomePage() {
 
   useEffect(() => {
     async function fetchData() {
-      const [
-        { count: total }, { count: verified },
-        { count: reports }, { count: verifications },
-        { data: recentMeds },
-      ] = await Promise.all([
-        supabase.from('medicines').select('*', { count: 'exact', head: true }),
-        supabase.from('medicines').select('*', { count: 'exact', head: true }).eq('status', 'verified'),
-        supabase.from('reports').select('*', { count: 'exact', head: true }),
-        supabase.from('verifications').select('*', { count: 'exact', head: true }),
-        supabase.from('medicines').select('*').eq('status', 'verified').order('created_at', { ascending: false }).limit(6),
-      ]);
-      setStats({ total: total ?? 0, verified: verified ?? 0, reports: reports ?? 0, verifications: verifications ?? 0 });
-      setMedicines(recentMeds ?? []);
-      setLoading(false);
+      try {
+        // Ensure initial medicines are seeded in Firestore if collection is empty
+        await seedMedicinesToFirestore();
+
+        const medCol = collection(db, 'medicines');
+        const repCol = collection(db, 'reports');
+        const verCol = collection(db, 'verifications');
+
+        const [totalCountSnap, verifiedCountSnap, reportsCountSnap, verificationsCountSnap, recentSnap] = await Promise.all([
+          getCountFromServer(medCol).catch(() => null),
+          getCountFromServer(firestoreQuery(medCol, where('status', '==', 'verified'))).catch(() => null),
+          getCountFromServer(repCol).catch(() => null),
+          getCountFromServer(verCol).catch(() => null),
+          getDocs(firestoreQuery(medCol, where('status', '==', 'verified'), limit(6))).catch(() => null),
+        ]);
+
+        const fetchedMeds: Medicine[] = [];
+        if (recentSnap && !recentSnap.empty) {
+          recentSnap.forEach((docSnap) => {
+            fetchedMeds.push({ id: docSnap.id, ...(docSnap.data() as Omit<Medicine, 'id'>) });
+          });
+        }
+
+        // Fallback to sample data if Firestore is offline or empty
+        const fallbackMeds = SAMPLE_MEDICINES.slice(0, 6).map((m) => ({ id: m.batch_number, ...m }));
+        const finalMeds = fetchedMeds.length > 0 ? fetchedMeds : fallbackMeds;
+
+        const totalCount = totalCountSnap?.data().count ?? SAMPLE_MEDICINES.length;
+        const verifiedCount = verifiedCountSnap?.data().count ?? SAMPLE_MEDICINES.filter(m => m.status === 'verified').length;
+        const reportsCount = reportsCountSnap?.data().count ?? 0;
+        const verificationsCount = verificationsCountSnap?.data().count ?? 0;
+
+        setStats({
+          total: totalCount,
+          verified: verifiedCount,
+          reports: reportsCount,
+          verifications: verificationsCount,
+        });
+        setMedicines(finalMeds);
+      } catch (err) {
+        console.error('Error fetching homepage data from Firestore:', err);
+        const fallbackMeds = SAMPLE_MEDICINES.slice(0, 6).map((m) => ({ id: m.batch_number, ...m }));
+        setMedicines(fallbackMeds);
+        setStats({
+          total: SAMPLE_MEDICINES.length,
+          verified: SAMPLE_MEDICINES.filter(m => m.status === 'verified').length,
+          reports: 0,
+          verifications: 0,
+        });
+      } finally {
+        setLoading(false);
+      }
     }
     fetchData();
   }, []);
@@ -220,7 +260,7 @@ export default function HomePage() {
             <div className="text-center py-20 text-[#64748B]">
               <Database className="w-14 h-14 mx-auto mb-3 opacity-20 text-[#2563EB]" />
               <p className="font-medium text-[#0F172A]">No medicines yet.</p>
-              <p className="text-sm mt-1">Run the Supabase setup SQL to load 20 demo medicines.</p>
+              <p className="text-sm mt-1">Database automatically synchronizes verified medicines.</p>
             </div>
           )}
         </div>

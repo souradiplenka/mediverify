@@ -8,7 +8,9 @@ import {
   HelpCircle, Camera, ArrowRight, Loader2, Globe, ShieldCheck,
   ShieldAlert, ExternalLink, Info, Upload, ImageIcon
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { SAMPLE_MEDICINES } from '@/lib/seedFirestore';
 import MedicineCard from '@/components/MedicineCard';
 import StatusBadge from '@/components/StatusBadge';
 import { Medicine } from '@/types';
@@ -630,44 +632,55 @@ function VerifyContent() {
 
     let found: Medicine[] = [];
 
-    // Step 1: Primary — search name & brand first (most accurate)
-    const { data: nameFirst } = await supabase
-      .from('medicines')
-      .select('*')
-      .or(`name.ilike.%${term}%,brand.ilike.%${term}%`);
-    if (nameFirst && nameFirst.length > 0) found = nameFirst;
-
-    // Step 1b: Broaden to other fields if no name/brand match
-    if (found.length === 0) {
-      const { data: broad } = await supabase
-        .from('medicines')
-        .select('*')
-        .or(`batch_number.ilike.%${term}%,active_ingredient.ilike.%${term}%,description.ilike.%${term}%`);
-      found = broad ?? [];
-    }
-
-    // Step 1c: Keyword fallback — only use words longer than 3 chars, skip pure numbers
-    if (found.length === 0) {
-      const words = term.split(/\s+/).filter(w => w.length >= 4 && !(/^\d+$/.test(w)));
-      for (const word of words) {
-        const { data: wordData } = await supabase
-          .from('medicines')
-          .select('*')
-          .or(`name.ilike.%${word}%,brand.ilike.%${word}%,active_ingredient.ilike.%${word}%`);
-        if (wordData && wordData.length > 0) { found = wordData; break; }
+    // Step 1: Query Firestore medicines (with local fallback if offline)
+    let allMeds: Medicine[] = [];
+    try {
+      const snap = await getDocs(collection(db, 'medicines'));
+      if (!snap.empty) {
+        snap.forEach((doc) => {
+          allMeds.push({ id: doc.id, ...(doc.data() as Omit<Medicine, 'id'>) });
+        });
       }
+    } catch (e) {
+      console.warn('Could not read from Firestore medicines, using fallback:', e);
     }
 
-    // Step 1d: Prefix fuzzy fallback — first 4 chars of first meaningful word
+    if (allMeds.length === 0) {
+      allMeds = SAMPLE_MEDICINES.map((m) => ({ id: m.batch_number, ...m }));
+    }
+
+    const tLower = term.toLowerCase();
+
+    // 1a: Search brand and name
+    found = allMeds.filter((m) => {
+      const brand = (m.brand || '').toLowerCase();
+      const name = (m.name || '').toLowerCase();
+      return brand.includes(tLower) || name.includes(tLower);
+    });
+
+    // 1b: Broaden to batch, ingredients, description
     if (found.length === 0) {
-      const firstWord = term.split(/\s+/).find(w => w.length >= 4 && !(/^\d+$/.test(w)));
-      if (firstWord) {
-        const prefix = firstWord.slice(0, 4);
-        const { data: prefixData } = await supabase
-          .from('medicines')
-          .select('*')
-          .or(`name.ilike.${prefix}%,brand.ilike.${prefix}%`);
-        if (prefixData && prefixData.length > 0) found = prefixData;
+      found = allMeds.filter((m) => {
+        const batch = (m.batch_number || '').toLowerCase();
+        const active = (m.active_ingredient || '').toLowerCase();
+        const desc = (m.description || '').toLowerCase();
+        return batch.includes(tLower) || active.includes(tLower) || desc.includes(tLower);
+      });
+    }
+
+    // 1c: Keyword fallback
+    if (found.length === 0) {
+      const words = tLower.split(/\s+/).filter(w => w.length >= 4 && !(/^\d+$/.test(w)));
+      for (const w of words) {
+        const matches = allMeds.filter((m) =>
+          (m.name || '').toLowerCase().includes(w) ||
+          (m.brand || '').toLowerCase().includes(w) ||
+          (m.active_ingredient || '').toLowerCase().includes(w)
+        );
+        if (matches.length > 0) {
+          found = matches;
+          break;
+        }
       }
     }
 
@@ -678,12 +691,17 @@ function VerifyContent() {
     setSearched(true);
     setLoading(false);
 
-    // Log verification
-    await supabase.from('verifications').insert({
-      medicine_id: sorted[0]?.id ?? null,
-      search_term: term,
-      result: sorted.length > 0 ? sorted[0].status : 'not_found_local',
-    });
+    // Log verification to Firestore
+    try {
+      await addDoc(collection(db, 'verifications'), {
+        medicine_id: sorted[0]?.id ?? null,
+        search_term: term,
+        result: sorted.length > 0 ? sorted[0].status : 'not_found_local',
+        verified_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      console.warn('Could not log verification to Firestore:', e);
+    }
 
     if (sorted.length === 0) {
       setFdaLoading(true);

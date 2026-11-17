@@ -5,7 +5,9 @@ import {
   Database, CheckCircle, AlertTriangle, ClipboardList,
   Activity, BarChart2, Loader2, RefreshCw
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, query, where, limit, getCountFromServer } from 'firebase/firestore';
+import { seedMedicinesToFirestore, SAMPLE_MEDICINES } from '@/lib/seedFirestore';
 import StatusBadge from '@/components/StatusBadge';
 
 interface Stats {
@@ -44,34 +46,91 @@ export default function DashboardPage() {
 
   const load = async () => {
     setLoading(true);
-    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    try {
+      await seedMedicinesToFirestore();
+      const medCol = collection(db, 'medicines');
+      const repCol = collection(db, 'reports');
+      const verCol = collection(db, 'verifications');
 
-    const [
-      { count: total }, { count: verified }, { count: flagged }, { count: reports }, { count: todayV },
-      { data: recentV }, { data: recentR }, { data: meds }
-    ] = await Promise.all([
-      supabase.from('medicines').select('*', { count: 'exact', head: true }),
-      supabase.from('medicines').select('*', { count: 'exact', head: true }).eq('status', 'verified'),
-      supabase.from('medicines').select('*', { count: 'exact', head: true }).in('status', ['suspicious', 'recalled']),
-      supabase.from('reports').select('*', { count: 'exact', head: true }),
-      supabase.from('verifications').select('*', { count: 'exact', head: true }).gte('verified_at', todayStart.toISOString()),
-      supabase.from('verifications').select('id, search_term, result, verified_at, medicines(name, status)').order('verified_at', { ascending: false }).limit(10),
-      supabase.from('reports').select('id, report_id, medicine_name, location, status, created_at').order('created_at', { ascending: false }).limit(10),
-      supabase.from('medicines').select('category'),
-    ]);
+      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
 
-    setStats({ total: total ?? 0, verified: verified ?? 0, flagged: flagged ?? 0, reports: reports ?? 0, verificationsToday: todayV ?? 0 });
-    setVerifications((recentV ?? []) as unknown as VerifRow[]);
-    setReports((recentR ?? []) as unknown as ReportRow[]);
+      const [totalCountSnap, verifiedCountSnap, reportsCountSnap, medsSnap, verSnap, repSnap] = await Promise.all([
+        getCountFromServer(medCol).catch(() => null),
+        getCountFromServer(query(medCol, where('status', '==', 'verified'))).catch(() => null),
+        getCountFromServer(repCol).catch(() => null),
+        getDocs(medCol).catch(() => null),
+        getDocs(query(verCol, limit(10))).catch(() => null),
+        getDocs(query(repCol, limit(10))).catch(() => null),
+      ]);
 
-    // Group by category
-    const catMap: Record<string, number> = {};
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (meds ?? []).forEach((m: any) => {
-      if (m.category) catMap[m.category] = (catMap[m.category] ?? 0) + 1;
-    });
-    setCategories(Object.entries(catMap).map(([category, count]) => ({ category, count })).sort((a, b) => b.count - a.count));
-    setLoading(false);
+      const medsList: { category?: string; status?: string }[] = [];
+      if (medsSnap && !medsSnap.empty) {
+        medsSnap.forEach(d => medsList.push(d.data()));
+      } else {
+        SAMPLE_MEDICINES.forEach(m => medsList.push(m));
+      }
+
+      const total = totalCountSnap?.data().count ?? medsList.length;
+      const verified = verifiedCountSnap?.data().count ?? medsList.filter(m => m.status === 'verified').length;
+      const flagged = medsList.filter(m => m.status === 'suspicious' || m.status === 'recalled').length;
+      const reportsCount = reportsCountSnap?.data().count ?? (repSnap ? repSnap.size : 0);
+
+      // Verifications list
+      const recentV: VerifRow[] = [];
+      let todayVCount = 0;
+      if (verSnap && !verSnap.empty) {
+        verSnap.forEach(d => {
+          const data = d.data();
+          if (data.verified_at && new Date(data.verified_at) >= todayStart) {
+            todayVCount++;
+          }
+          recentV.push({
+            id: d.id,
+            search_term: data.search_term || '',
+            result: data.result || 'verified',
+            verified_at: data.verified_at || new Date().toISOString(),
+            medicines: data.medicines || null,
+          });
+        });
+      }
+
+      // Reports list
+      const recentR: ReportRow[] = [];
+      if (repSnap && !repSnap.empty) {
+        repSnap.forEach(d => {
+          const data = d.data();
+          recentR.push({
+            id: d.id,
+            report_id: data.report_id || d.id,
+            medicine_name: data.medicine_name || 'Unknown',
+            location: data.location || 'Unknown',
+            status: data.status || 'submitted',
+            created_at: data.created_at || new Date().toISOString(),
+          });
+        });
+      }
+
+      setStats({
+        total,
+        verified,
+        flagged,
+        reports: reportsCount,
+        verificationsToday: todayVCount,
+      });
+      setVerifications(recentV);
+      setReports(recentR);
+
+      // Group by category
+      const catMap: Record<string, number> = {};
+      medsList.forEach((m) => {
+        if (m.category) catMap[m.category] = (catMap[m.category] ?? 0) + 1;
+      });
+      setCategories(Object.entries(catMap).map(([category, count]) => ({ category, count })).sort((a, b) => b.count - a.count));
+    } catch (err) {
+      console.error('Error loading dashboard from Firestore:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, []);

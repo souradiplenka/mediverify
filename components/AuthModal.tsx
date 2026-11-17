@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { LogIn, UserPlus, X, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { auth } from '@/lib/firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -30,33 +31,17 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
 
     try {
       if (mode === 'signup') {
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: fullName || email.split('@')[0] }
-          }
-        });
-
-        if (signUpError) throw signUpError;
-
-        if (data.session) {
-          setMessage('Account created & signed in successfully!');
-          setTimeout(() => {
-            onSuccess?.();
-            onClose();
-          }, 1200);
-        } else {
-          setMessage('Account created! Please check your email to confirm registration or sign in.');
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        if (fullName && userCredential.user) {
+          await updateProfile(userCredential.user, { displayName: fullName });
         }
+        setMessage('Account created & signed in successfully!');
+        setTimeout(() => {
+          onSuccess?.();
+          onClose();
+        }, 1200);
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        if (signInError) throw signInError;
-
+        await signInWithEmailAndPassword(auth, email, password);
         setMessage('Signed in successfully!');
         setTimeout(() => {
           onSuccess?.();

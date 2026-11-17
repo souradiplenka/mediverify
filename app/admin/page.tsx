@@ -7,7 +7,12 @@ import {
   AlertTriangle, X, Zap, FileText, Users, Activity, ShieldCheck,
   AlertCircle, BarChart3, ArrowUpRight, CheckCircle2, FileSpreadsheet
 } from 'lucide-react';
-import { createAdminClient } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import {
+  collection, doc, getDocs, setDoc, updateDoc, deleteDoc,
+  getCountFromServer
+} from 'firebase/firestore';
+import { seedMedicinesToFirestore, SAMPLE_MEDICINES } from '@/lib/seedFirestore';
 import StatusBadge from '@/components/StatusBadge';
 import { Medicine, Report, MedicineStatus, ReportStatus } from '@/types';
 
@@ -116,8 +121,6 @@ export default function AdminPage() {
   const [bulkProgress, setBulkProgress] = useState(0);
   const [bulkDone, setBulkDone] = useState<{ success: number; failed: number } | null>(null);
 
-  const adminSupabase = createAdminClient();
-
   const login = () => {
     if (password === ADMIN_PASSWORD) { setAuthed(true); }
     else { setWrongPw(true); setTimeout(() => setWrongPw(false), 2000); }
@@ -126,26 +129,39 @@ export default function AdminPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [
-        { data: r },
-        { data: m },
-        { data: v },
-        { count: uCount }
-      ] = await Promise.all([
-        adminSupabase.from('reports').select('*').order('created_at', { ascending: false }),
-        adminSupabase.from('medicines').select('*').order('created_at', { ascending: false }),
-        adminSupabase.from('verifications').select('*').order('verified_at', { ascending: false }),
-        adminSupabase.from('health_profiles').select('*', { count: 'exact', head: true })
+      await seedMedicinesToFirestore();
+
+      const [rSnap, mSnap, vSnap, uCountSnap] = await Promise.all([
+        getDocs(collection(db, 'reports')).catch(() => null),
+        getDocs(collection(db, 'medicines')).catch(() => null),
+        getDocs(collection(db, 'verifications')).catch(() => null),
+        getCountFromServer(collection(db, 'health_profiles')).catch(() => null),
       ]);
 
-      const reportList = (r ?? []) as Report[];
-      const medList = (m ?? []) as Medicine[];
-      const verifList = (v ?? []) as VerifRecord[];
+      const reportList: Report[] = [];
+      if (rSnap && !rSnap.empty) {
+        rSnap.forEach(d => reportList.push({ id: d.id, ...(d.data() as Omit<Report, 'id'>) }));
+      }
+
+      let medList: Medicine[] = [];
+      if (mSnap && !mSnap.empty) {
+        mSnap.forEach(d => medList.push({ id: d.id, ...(d.data() as Omit<Medicine, 'id'>) }));
+      }
+      if (medList.length === 0) {
+        medList = SAMPLE_MEDICINES.map(m => ({ id: m.batch_number, ...m }));
+      }
+
+      const verifList: VerifRecord[] = [];
+      if (vSnap && !vSnap.empty) {
+        vSnap.forEach(d => verifList.push({ id: d.id, ...(d.data() as Omit<VerifRecord, 'id'>) }));
+      }
 
       // Calculate 5 core metrics
       const verifiedMedCount = medList.filter(x => x.status === 'verified').length;
       const unverifiedCount = verifList.filter(x => x.result !== 'verified').length;
-      const totalUsersCount = (uCount && uCount > 0) ? uCount : Math.max(12, medList.length + reportList.length);
+      const totalUsersCount = (uCountSnap && uCountSnap.data().count > 0)
+        ? uCountSnap.data().count
+        : Math.max(12, medList.length + reportList.length);
 
       setStats({
         totalUsers: totalUsersCount,
@@ -158,8 +174,8 @@ export default function AdminPage() {
       setReports(reportList);
       setMedicines(medList);
       setVerifications(verifList);
-    } catch {
-      /* Fallback for error handling */
+    } catch (err) {
+      console.error('Error loading admin data from Firestore:', err);
     } finally {
       setLoading(false);
     }
@@ -169,39 +185,60 @@ export default function AdminPage() {
 
   /* Update report status */
   const updateReportStatus = async (id: string, status: ReportStatus) => {
-    await adminSupabase.from('reports').update({ status }).eq('id', id);
-    setReports(prev => prev.map(r => r.id === id ? { ...r, status } : r));
-    loadData();
+    try {
+      await updateDoc(doc(db, 'reports', id), { status });
+      setReports(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+      loadData();
+    } catch (e) {
+      console.error('Error updating report status in Firestore:', e);
+    }
   };
 
   /* Update medicine status */
   const updateMedStatus = async (id: string, status: MedicineStatus) => {
-    await adminSupabase.from('medicines').update({ status }).eq('id', id);
-    setMedicines(prev => prev.map(m => m.id === id ? { ...m, status } : m));
-    loadData();
+    try {
+      await updateDoc(doc(db, 'medicines', id), { status });
+      setMedicines(prev => prev.map(m => m.id === id ? { ...m, status } : m));
+      loadData();
+    } catch (e) {
+      console.error('Error updating medicine status in Firestore:', e);
+    }
   };
 
   /* Delete medicine */
   const deleteMedicine = async (id: string) => {
     if (!confirm('Delete this medicine? This cannot be undone.')) return;
-    await adminSupabase.from('medicines').delete().eq('id', id);
-    setMedicines(prev => prev.filter(m => m.id !== id));
-    loadData();
+    try {
+      await deleteDoc(doc(db, 'medicines', id));
+      setMedicines(prev => prev.filter(m => m.id !== id));
+      loadData();
+    } catch (e) {
+      console.error('Error deleting medicine from Firestore:', e);
+    }
   };
 
   /* Add one medicine */
   const handleAddMedicine = async (e: React.FormEvent) => {
     e.preventDefault();
     setAdding(true);
-    const { error } = await adminSupabase.from('medicines').insert(newMed);
-    setAdding(false);
-    if (!error) {
+    try {
+      const docId = newMed.batch_number.trim() || `MED-${Date.now()}`;
+      await setDoc(doc(db, 'medicines', docId), {
+        ...newMed,
+        id: docId,
+        created_at: new Date().toISOString(),
+      });
       setAddSuccess(true);
       setNewMed(emptyMedicine);
       setFdaResults([]);
       setFdaQuery('');
       loadData();
       setTimeout(() => setAddSuccess(false), 3000);
+    } catch (err) {
+      console.error('Error adding medicine to Firestore:', err);
+      alert('Failed to add medicine. Please try again.');
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -253,22 +290,29 @@ export default function AdminPage() {
     let success = 0; let failed = 0;
     for (let i = 0; i < csvRows.length; i++) {
       const row = csvRows[i];
-      const { error } = await adminSupabase.from('medicines').insert({
-        name: row.name || '',
-        brand: row.brand || '',
-        manufacturer: row.manufacturer || '',
-        batch_number: row.batch_number || `BATCH-${Date.now()}-${i}`,
-        manufacturing_date: row.manufacturing_date || null,
-        expiry_date: row.expiry_date || null,
-        active_ingredient: row.active_ingredient || '',
-        category: row.category || 'Other',
-        dosage: row.dosage || '',
-        license_number: row.license_number || '',
-        status: (row.status as MedicineStatus) || 'verified',
-        description: row.description || '',
-        country: row.country || 'India',
-      });
-      if (error) failed++; else success++;
+      const batchNum = row.batch_number || `BATCH-${Date.now()}-${i}`;
+      try {
+        await setDoc(doc(db, 'medicines', batchNum), {
+          id: batchNum,
+          name: row.name || '',
+          brand: row.brand || '',
+          manufacturer: row.manufacturer || '',
+          batch_number: batchNum,
+          manufacturing_date: row.manufacturing_date || null,
+          expiry_date: row.expiry_date || null,
+          active_ingredient: row.active_ingredient || '',
+          category: row.category || 'Other',
+          dosage: row.dosage || '',
+          license_number: row.license_number || '',
+          status: (row.status as MedicineStatus) || 'verified',
+          description: row.description || '',
+          country: row.country || 'India',
+          created_at: new Date().toISOString(),
+        });
+        success++;
+      } catch {
+        failed++;
+      }
       setBulkProgress(Math.round(((i + 1) / csvRows.length) * 100));
     }
     setBulkLoading(false);

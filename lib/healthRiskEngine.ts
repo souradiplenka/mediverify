@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from './firebase';
 
 export interface UserProfile {
   name: string;
@@ -249,37 +250,36 @@ export function predictMedicationRiskAndEffects(track: MedicationTrack, profile?
 /* ── Fetch & Save Cloud Patient Data ── */
 export async function fetchUserPatientData(userId: string): Promise<{ profile: UserProfile; tracks: MedicationTrack[] } | null> {
   try {
-    const { data } = await supabase
-      .from('health_profiles')
-      .select('profile, tracks')
-      .eq('user_id', userId)
-      .single();
+    const docRef = doc(db, 'health_profiles', userId);
+    const snap = await getDoc(docRef);
 
-    if (data) {
+    if (snap.exists()) {
+      const data = snap.data();
       return {
         profile: data.profile as UserProfile,
         tracks: (data.tracks as MedicationTrack[]) ?? [],
       };
     }
     return null;
-  } catch {
+  } catch (error) {
+    console.error('Error fetching patient data from Firestore:', error);
     return null;
   }
 }
 
 export async function saveUserPatientData(userId: string, profile: UserProfile, tracks: MedicationTrack[]): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('health_profiles')
-      .upsert({
-        user_id: userId,
-        profile,
-        tracks,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' });
+    const docRef = doc(db, 'health_profiles', userId);
+    await setDoc(docRef, {
+      user_id: userId,
+      profile,
+      tracks,
+      updated_at: new Date().toISOString(),
+    }, { merge: true });
 
-    return !error;
-  } catch {
+    return true;
+  } catch (error) {
+    console.error('Error saving patient data to Firestore:', error);
     return false;
   }
 }

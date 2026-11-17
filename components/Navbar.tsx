@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Shield, Menu, X, AlertTriangle, User, LogIn, LogOut } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { User as SupabaseUser } from '@supabase/supabase-js';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
 import AuthModal from './AuthModal';
 
 const NAV_LINKS = [
@@ -22,27 +22,18 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
-    // Check initial auth state
-    supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOut(auth);
   };
 
   const openAuth = (mode: 'signin' | 'signup') => {
@@ -50,7 +41,7 @@ export default function Navbar() {
     setAuthModalOpen(true);
   };
 
-  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'My Account';
+  const displayName = user?.displayName || user?.email?.split('@')[0] || 'My Account';
 
   return (
     <>

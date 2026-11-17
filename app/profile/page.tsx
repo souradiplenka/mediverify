@@ -6,8 +6,8 @@ import {
   User, ShieldCheck, HeartPulse, AlertTriangle, Phone, Mail, Edit3,
   CheckCircle2, Save, Sparkles, Activity, Calendar, FileText, Lock, LogIn, Cloud, CloudOff
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { User as SupabaseUser } from '@supabase/supabase-js';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import AuthModal from '@/components/AuthModal';
 
 export interface FullUserProfile {
@@ -41,7 +41,7 @@ const DEFAULT_PROFILE: FullUserProfile = {
 };
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<FullUserProfile>(DEFAULT_PROFILE);
   const [isEditing, setIsEditing] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -51,47 +51,27 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState<FullUserProfile>(DEFAULT_PROFILE);
 
   useEffect(() => {
-    async function loadProfile() {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-
       try {
         const saved = localStorage.getItem('mediverify_full_profile');
         if (saved) {
           const parsed = JSON.parse(saved);
           setProfile(parsed);
           setFormData(parsed);
-        } else {
-          if (currentUser) {
-            const userProf = {
-              ...DEFAULT_PROFILE,
-              name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Patient',
-              email: currentUser.email || DEFAULT_PROFILE.email,
-            };
-            setProfile(userProf);
-            setFormData(userProf);
-          }
+        } else if (currentUser) {
+          const userProf = {
+            ...DEFAULT_PROFILE,
+            name: currentUser.displayName || currentUser.email?.split('@')[0] || 'Patient',
+            email: currentUser.email || DEFAULT_PROFILE.email,
+          };
+          setProfile(userProf);
+          setFormData(userProf);
         }
       } catch { /* use default */ }
-    }
-
-    loadProfile();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        setFormData(prev => ({
-          ...prev,
-          name: prev.name || currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Patient',
-          email: currentUser.email || prev.email,
-        }));
-      }
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   const handleSave = (e: React.FormEvent) => {

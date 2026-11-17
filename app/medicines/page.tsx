@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { Search, Filter, Database, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, query as fsQuery, orderBy } from 'firebase/firestore';
+import { seedMedicinesToFirestore, SAMPLE_MEDICINES } from '@/lib/seedFirestore';
 import MedicineCard from '@/components/MedicineCard';
 import { Medicine } from '@/types';
 
@@ -23,12 +25,40 @@ export default function MedicinesPage() {
 
   const fetchMedicines = async () => {
     setLoading(true);
-    let query = supabase.from('medicines').select('*').order('created_at', { ascending: false });
-    if (category !== 'All') query = query.eq('category', category);
-    if (status !== 'All') query = query.eq('status', status);
-    const { data } = await query;
-    setMedicines(data ?? []);
-    setLoading(false);
+    try {
+      await seedMedicinesToFirestore();
+      const medRef = collection(db, 'medicines');
+      const snap = await getDocs(medRef);
+      let list: Medicine[] = [];
+      if (!snap.empty) {
+        snap.forEach((doc) => {
+          list.push({ id: doc.id, ...(doc.data() as Omit<Medicine, 'id'>) });
+        });
+      }
+      if (list.length === 0) {
+        list = SAMPLE_MEDICINES.map((m) => ({ id: m.batch_number, ...m }));
+      }
+
+      if (category !== 'All') {
+        list = list.filter((m) => m.category?.toLowerCase() === category.toLowerCase());
+      }
+      if (status !== 'All') {
+        list = list.filter((m) => m.status === status);
+      }
+      setMedicines(list);
+    } catch (err) {
+      console.warn('Error fetching medicines from Firestore:', err);
+      let list = SAMPLE_MEDICINES.map((m) => ({ id: m.batch_number, ...m }));
+      if (category !== 'All') {
+        list = list.filter((m) => m.category?.toLowerCase() === category.toLowerCase());
+      }
+      if (status !== 'All') {
+        list = list.filter((m) => m.status === status);
+      }
+      setMedicines(list);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filtered = medicines.filter((m) => {

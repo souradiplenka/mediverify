@@ -12,14 +12,14 @@ import {
   UserProfile, MedicationTrack, SAMPLE_PATIENT_PROFILE, SAMPLE_MEDICATION_TRACKS,
   predictMedicationRiskAndEffects, checkMedicationExpiryStatus, fetchUserPatientData, saveUserPatientData
 } from '@/lib/healthRiskEngine';
-import { supabase } from '@/lib/supabase';
-import { User as SupabaseUser } from '@supabase/supabase-js';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, updateProfile, User as FirebaseUser } from 'firebase/auth';
 import AuthModal from '@/components/AuthModal';
 
 export default function HealthRiskDashboard() {
   const [profile, setProfile] = useState<UserProfile>(SAMPLE_PATIENT_PROFILE);
   const [tracks, setTracks] = useState<MedicationTrack[]>(SAMPLE_MEDICATION_TRACKS);
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -46,36 +46,7 @@ export default function HealthRiskDashboard() {
 
   useEffect(() => {
     async function loadData() {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      setUser(currentUser);
-
-      if (currentUser) {
-        const uName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Patient';
-        const cloudData = await fetchUserPatientData(currentUser.id);
-        if (cloudData) {
-          const updatedProf = {
-            ...cloudData.profile,
-            name: (!cloudData.profile.name || cloudData.profile.name === 'Guest Patient' || cloudData.profile.name === 'Patient')
-              ? uName
-              : cloudData.profile.name
-          };
-          setProfile(updatedProf);
-          setTracks(cloudData.tracks);
-          if (updatedProf.name !== cloudData.profile.name) {
-            await saveUserPatientData(currentUser.id, updatedProf, cloudData.tracks);
-          }
-        } else {
-          const newProf: UserProfile = {
-            ...SAMPLE_PATIENT_PROFILE,
-            name: uName,
-          };
-          setProfile(newProf);
-          await saveUserPatientData(currentUser.id, newProf, SAMPLE_MEDICATION_TRACKS);
-        }
-      } else {
-        loadLocalData();
-      }
-      setLoading(false);
+      // Handled reactively by onAuthStateChanged
     }
 
     function loadLocalData() {
@@ -87,15 +58,12 @@ export default function HealthRiskDashboard() {
       } catch { /* fallback */ }
     }
 
-    loadData();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null;
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         setSyncing(true);
-        const uName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Patient';
-        const cloudData = await fetchUserPatientData(currentUser.id);
+        const uName = currentUser.displayName || currentUser.email?.split('@')[0] || 'Patient';
+        const cloudData = await fetchUserPatientData(currentUser.uid);
         if (cloudData) {
           const updatedProf = {
             ...cloudData.profile,
@@ -105,20 +73,26 @@ export default function HealthRiskDashboard() {
           };
           setProfile(updatedProf);
           setTracks(cloudData.tracks);
+          if (updatedProf.name !== cloudData.profile.name) {
+            await saveUserPatientData(currentUser.uid, updatedProf, cloudData.tracks);
+          }
         } else {
           const newProf: UserProfile = {
             ...profile,
             name: uName !== 'Patient' ? uName : (profile.name || 'Patient'),
           };
           setProfile(newProf);
-          await saveUserPatientData(currentUser.id, newProf, tracks);
+          await saveUserPatientData(currentUser.uid, newProf, tracks);
         }
         setSyncing(false);
+      } else {
+        loadLocalData();
       }
+      setLoading(false);
     });
 
     return () => {
-      subscription.unsubscribe();
+      unsubscribe();
     };
   }, []);
 
@@ -133,10 +107,12 @@ export default function HealthRiskDashboard() {
 
     if (user) {
       setSyncing(true);
-      await saveUserPatientData(user.id, newProfile, newTracks);
-      // Also sync user metadata full_name if updated
-      if (newProfile.name && newProfile.name !== user.user_metadata?.full_name) {
-        await supabase.auth.updateUser({ data: { full_name: newProfile.name } });
+      await saveUserPatientData(user.uid, newProfile, newTracks);
+      // Also sync user displayName if updated
+      if (newProfile.name && newProfile.name !== user.displayName) {
+        try {
+          await updateProfile(user, { displayName: newProfile.name });
+        } catch { /* ignore */ }
       }
       setSyncing(false);
     }
@@ -146,7 +122,7 @@ export default function HealthRiskDashboard() {
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     const updated: UserProfile = {
-      name: editName.trim() || (user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Patient'),
+      name: editName.trim() || (user?.displayName || user?.email?.split('@')[0] || 'Patient'),
       age: Number(editAge) || 26,
       gender: editGender,
       allergies: editAllergies.split(',').map(s => s.trim()).filter(Boolean),
@@ -157,7 +133,7 @@ export default function HealthRiskDashboard() {
   };
 
   const openProfileModal = () => {
-    const uName = user?.user_metadata?.full_name || user?.email?.split('@')[0];
+    const uName = user?.displayName || user?.email?.split('@')[0];
     setEditName(profile.name === 'Guest Patient' && uName ? uName : profile.name);
     setEditAge(profile.age || 26);
     setEditGender(profile.gender || 'Male');
@@ -301,7 +277,7 @@ export default function HealthRiskDashboard() {
     );
   }
 
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || profile.name;
+  const userName = user?.displayName || user?.email?.split('@')[0] || profile.name;
 
   return (
     <div className="min-h-screen bg-slate-50/70 pb-20">

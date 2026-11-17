@@ -7,7 +7,9 @@ import {
   ArrowLeft, Building2, Hash, Calendar, Pill, FlaskConical,
   Globe, FileText, Activity, AlertTriangle, CheckCircle, Loader2
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { doc, getDoc, collection, query, where, getDocs, getCountFromServer, addDoc } from 'firebase/firestore';
+import { SAMPLE_MEDICINES } from '@/lib/seedFirestore';
 import StatusBadge from '@/components/StatusBadge';
 import { Medicine } from '@/types';
 
@@ -20,25 +22,64 @@ export default function MedicineDetailPage() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.from('medicines').select('*').eq('id', id).single();
-      if (!data) { router.push('/medicines'); return; }
-      setMedicine(data);
+      if (!id) return;
+      try {
+        let foundMedicine: Medicine | null = null;
 
-      // Fetch verification count
-      const { count } = await supabase
-        .from('verifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('medicine_id', id);
-      setVerifyCount(count ?? 0);
+        // Try direct doc lookup
+        const docRef = doc(db, 'medicines', id);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+          foundMedicine = { id: snap.id, ...(snap.data() as Omit<Medicine, 'id'>) };
+        } else {
+          // Try querying by batch_number or id field
+          const qSnap = await getDocs(query(collection(db, 'medicines'), where('batch_number', '==', id)));
+          if (!qSnap.empty) {
+            const first = qSnap.docs[0];
+            foundMedicine = { id: first.id, ...(first.data() as Omit<Medicine, 'id'>) };
+          }
+        }
 
-      // Log this view as a verification
-      await supabase.from('verifications').insert({
-        medicine_id: id,
-        search_term: data.name,
-        result: data.status,
-      });
+        // Fallback to SAMPLE_MEDICINES
+        if (!foundMedicine) {
+          const sample = SAMPLE_MEDICINES.find(m => m.batch_number === id || m.name.toLowerCase() === id.toLowerCase());
+          if (sample) {
+            foundMedicine = { id: sample.batch_number, ...sample };
+          }
+        }
 
-      setLoading(false);
+        if (!foundMedicine) {
+          router.push('/medicines');
+          return;
+        }
+
+        setMedicine(foundMedicine);
+
+        // Fetch verification count
+        try {
+          const countSnap = await getCountFromServer(
+            query(collection(db, 'verifications'), where('medicine_id', '==', id))
+          );
+          setVerifyCount(countSnap.data().count);
+        } catch {
+          setVerifyCount(1);
+        }
+
+        // Log this view as a verification
+        try {
+          await addDoc(collection(db, 'verifications'), {
+            medicine_id: id,
+            search_term: foundMedicine.name,
+            result: foundMedicine.status,
+            verified_at: new Date().toISOString(),
+          });
+        } catch { /* ignore logging error */ }
+
+      } catch (err) {
+        console.error('Error loading medicine details:', err);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [id, router]);

@@ -3,7 +3,8 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AlertTriangle, Search, CheckCircle, Clock, FileText, Loader2, Upload } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { collection, doc, getDoc, setDoc, query, where, getDocs } from 'firebase/firestore';
 import { Report } from '@/types';
 
 function generateReportId() {
@@ -59,39 +60,60 @@ function ReportContent() {
     setSubmitting(true);
 
     const id = generateReportId();
-    const { error } = await supabase.from('reports').insert({
-      report_id: id,
-      medicine_name: form.medicine_name,
-      batch_number: form.batch_number || null,
-      location: form.location,
-      reporter_name: form.reporter_name || null,
-      reporter_email: form.reporter_email || null,
-      description: form.description,
-      status: 'submitted',
-    });
+    try {
+      const reportData: Omit<Report, 'id'> & { id: string } = {
+        id,
+        report_id: id,
+        medicine_name: form.medicine_name,
+        batch_number: form.batch_number || '',
+        location: form.location,
+        reporter_name: form.reporter_name || '',
+        reporter_email: form.reporter_email || '',
+        description: form.description,
+        status: 'submitted',
+        created_at: new Date().toISOString(),
+      };
 
-    setSubmitting(false);
-    if (!error) {
+      await setDoc(doc(db, 'reports', id), reportData);
       setReportId(id);
       setSubmitted(true);
+    } catch (error) {
+      console.error('Error submitting report to Firestore:', error);
+      alert('Failed to submit report. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleTrack = async () => {
-    if (!trackId.trim()) return;
+    const searchId = trackId.trim().toUpperCase();
+    if (!searchId) return;
     setTracking(true);
     setTrackError('');
     setTrackResult(null);
 
-    const { data } = await supabase
-      .from('reports')
-      .select('*')
-      .eq('report_id', trackId.trim().toUpperCase())
-      .single();
-
-    if (data) setTrackResult(data);
-    else setTrackError('Report not found. Please check your Report ID.');
-    setTracking(false);
+    try {
+      // Direct lookup by doc ID
+      const directRef = doc(db, 'reports', searchId);
+      const snap = await getDoc(directRef);
+      if (snap.exists()) {
+        setTrackResult({ id: snap.id, ...(snap.data() as Omit<Report, 'id'>) });
+      } else {
+        // Query by report_id field
+        const qSnap = await getDocs(query(collection(db, 'reports'), where('report_id', '==', searchId)));
+        if (!qSnap.empty) {
+          const docItem = qSnap.docs[0];
+          setTrackResult({ id: docItem.id, ...(docItem.data() as Omit<Report, 'id'>) });
+        } else {
+          setTrackError('Report not found. Please check your Report ID.');
+        }
+      }
+    } catch (err) {
+      console.error('Error tracking report in Firestore:', err);
+      setTrackError('Error checking report status. Please try again.');
+    } finally {
+      setTracking(false);
+    }
   };
 
   const stepIndex = (s: string) => STATUS_STEPS.indexOf(s);
